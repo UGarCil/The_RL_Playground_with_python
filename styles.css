@@ -1,0 +1,16 @@
+.sourceCodeFont {
+  font-family: "Source Code Pro", monospace;
+  font-optical-sizing: auto;
+  font-weight: 300;
+  font-style: normal;
+}
+
+body{
+    font-size: 1.2em;
+    color: #ffffff;
+    background-color:#292626;
+}
+
+.navbar{
+  color:green
+}
