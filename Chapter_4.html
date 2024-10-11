@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+</head>
+
+<body style="background-color: #c5d2d2; color: #032625;">
+    <!-- ############### Insert NAVBAR with jQuery ############## -->
+    <div id="navbarJQ"></div>
+    <!-- ############### Edit text elements in this page ############## -->
+    <div class="container ">
+        <div class="row pt-5">
+            <div class="col-lg-12 align-items-center d-flex abc">
+                <span style="font-size: 2em;">Chapter 4</span> - <span style="font-size: 1.2em"> Editing our game
+                    layout: Velocity and Collisions</span>.
+            </div>
+            <!-- <div class="text-center">
+                <iframe width="70%" height="420" src="TODO" title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div> -->
+
+
+            <div class="row-lg-12 pt-5">
+                <p>
+                    In this chapter we will focus on the ball from our <b>Breakout</b> project. We will add collision
+                    behavior to the ball and make it bounce against the paddle
+                </p>
+                <p>
+                    Our game is taking shape! In the last chapter we updated the output.py file to make the paddle
+                    listen to the user, and now it's time to edit the ball. At this stage, it may be useful to outline
+                    the things that have to happen in our game.
+                </p>
+                <p>
+                    Whenever you create a game-like environment, I always recommend students to create a diagram that
+                    outlines the type of interactions between the components that make the game.
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_4/0.png" style="width: 80%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    This is a good way to keep track of the complexity in our applications. While some arrows may not
+                    involve a lot of coding, some other are the heart of our applications. For this game, it seems we
+                    need algorithms for:
+                <ul>
+                    <li>interaction ball - paddle</li>
+                    <li>interaction ball - block</li>
+                    <li>interaction ball - screen</li>
+                    <li>interaction paddle - screen</li>
+                </ul>
+                </p>
+                <p>
+                    It turns out the interaction paddle - screen was the focus of our previous chapter, and so we only
+                    have to model three interactions. In the last chapter we also said the update() function is the one
+                    that
+                    reflects the rules of our algorithm, so it makes sense to add some comments to our code before we
+                    get started:
+                </p>
+                <pre><code>
+            def update():
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit() 
+                    if event.type == pygame.KEYDOWN:
+                        gameManager.paddle.userInput(event)
+                    if event.type == pygame.KEYUP:
+                        if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                            gameManager.paddle.direction = [0,1,0]
+                <b># Gameplay:
+                # interaction paddle - screen
+                gameManager.paddle.update()
+                # interaction ball - paddle
+                # interaction ball - screen
+                # interaction ball - block</b>
+                
+                
+                </code></pre>
+
+                <p>
+                    Wouldn't it be great if we already had functions for each of these interactions? In programming, we
+                    often work by layers. When we have a well defined step or action we often encapsulate it in its own
+                    tiny bubble, give it a name, and leave it for later. So let's make a wish for evey interaction:
+                <pre><code>
+                # Gameplay:
+                # interaction paddle - screen
+                <b style="font-size: 1.2em;">gameManager.paddle.update()</b>
+                # interaction ball - paddle
+                <b style="font-size: 1.2em;">gameManager.ball.update_collision_paddle(gameManager.paddle)</b>
+                # interaction ball - screen
+                <b style="font-size: 1.2em;">gameManager.ball.update_collision_screen()</b>
+                # interaction ball - block
+                <b style="font-size: 1.2em;">gameManager.ball.update_collision_blocks(gameManager.walls)</b>
+                
+                            
+                            
+                </code></pre>
+                Notice that our paddle already has a function that takes care of its interaction with the edges of the
+                screen
+                (<b>gameManager.paddle.update()</b>). Let's now update the collision of the ball with the paddle.
+                </p>
+                <h2 class="text-start m-5">Interaction ball - paddle</h2>
+                <p>
+                    Create the function update_collision_paddle() as part of the Food child class:
+                </p>
+                <pre><code>
+            class Food(GameObject):
+                def __init__(self, position, angle, object_type, img_path, scale_factor):
+                    super().__init__(position, angle, "food", img_path, scale_factor)
+                    <b>
+                def update_collision_paddle(self,paddle):
+                    if self.rect.colliderect(paddle):
+                    self.dy = -abs(self.dy)
+                        
+                    </b>
+                </code>
+            </pre>
+                <p>
+                    Here, the function receives the paddle (another instance of GameObject), and uses the hitbox
+                    (self.rect) to ask if any part of the ball is touching that object, by using the function
+                    colliderect(), which compares if two hitboxes touch each other. When the ball touches the paddle,
+                    the velocity of the ball changes, always becoming negative.
+                </p>
+                <p>
+                    The reason for the negative value of the ball has to do with how Pygame adds pixels, and rows of
+                    pixels, to the screen. The way it does it is by adding elements from top to bottom, from left to
+                    right. So, the first row with value 0 (programmers also count starting at 0) is the top edge of the
+                    screen. If we want the ball to go up then the velocity has to be negative.
+                </p>
+
+                <h2 class="text-start m-5">Interaction ball - screen</h2>
+                <p>
+                    Add now another function to the Food class, named <b>update_collision_screen()</b>. This action has
+                    to ask if the ball is:
+                <ul>
+                    <li>touching the RIGHT edge of the screen with value SCREEN[0] in x</li>
+                    <li>touching the BOTTOM edge of the screen with value SCREEN[1] in y</li>
+                    <li>touching the LEFT edge of the screen with value 0 in x</li>
+                    <li>toucing the UP edge of the screen with value 0 in y</li>
+                </ul>
+                <pre><code>
+
+            def update_collision_screen(self):
+                # RIGHT
+                if (self.x + self.image.get_width()//2) >= SCREEN[0]:
+                    self.dx = -abs(self.dx)
+                # BOTTOM
+                elif (self.y + self.image.get_height()//2) >= SCREEN[1]:
+                    self.dy = -abs(self.dy)
+                # LEFT 
+                elif (self.x - self.image.get_width()//2) <= 0:
+                    self.dx = abs(self.dx)
+                # UP
+                elif (self.y - self.image.get_height()//2) <= 0:
+                    self.dy = abs(self.dy)
+                </code></pre>
+                </p>
+                <h2 class="text-start m-5">Updating the position of the ball</h2>
+                <p>
+                    It's looking good! However, running the code at this stage doesn't move the ball
+                    because the only changes we have applied so far affect only the velocities,
+                    called dx and dy.
+                    We need to connect the speed to position somehow. Let's add a function update_position()
+                    to the class Food:
+                </p>
+
+                <pre><code>
+            def update_position(self):
+                self.x += self.dx 
+                self.y += self.dy
+                </code></pre>
+                <p>
+                    We need to make sure our functions are being executed. For now, let's make sure they are included in
+                    the main update() function:
+                </p>
+                <pre><code>
+        def update():
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit() 
+                if event.type == pygame.KEYDOWN:
+                    gameManager.paddle.userInput(event)
+                if event.type == pygame.KEYUP:
+                    if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                        gameManager.paddle.direction = [0,1,0]
+            # Game play:
+            # interaction paddle - screen
+            <b style="font-size: 1.2em;">gameManager.paddle.update()</b>
+            # interaction ball - paddle
+            <b style="font-size: 1.2em;">gameManager.ball.update_collision_paddle(gameManager.paddle)</b>
+            # interaction ball - screen
+            <b style="font-size: 1.2em;">gameManager.ball.update_collision_screen()</b>
+            <b style="font-size: 1.2em;">gameManager.ball.update_position()</b>
+            # interaction ball - block
+
+                </code></pre>
+                <h2 class="text-start m-5">The beauty of refactoring</h2>
+                <p>
+                    Have you noticed that all of the functions we recently wrote involve our ball? Moreover, they all
+                    start with the name "update_something". Why not putting them all inside the ball? When you have a
+                    set of code snippets that naturally belong together, it's time to encapsulate them into one big
+                    function.
+                </p>
+                <p>
+                    Add a new function update() to the Food class. Then, take all of the elements involving the ball
+                    from the main update(), and place them inside your newly created function:
+                <pre><code>
+
+        class Food(GameObject):
+            ...
+                
+            def update(self,paddle):
+                # interaction ball - paddle
+                <b style="font-size: 1.2em;">self.update_collision_paddle(paddle)</b>
+                # interaction ball - screen
+                <b style="font-size: 1.2em;">self.update_collision_screen()</b>
+                # move the ball
+                <b style="font-size: 1.2em;">self.update_position()</b>
+                    </code></pre>
+                A couple of very important considerations. Notice that update() will receive the paddle as a parameter
+                so it can pass it to the function update_collision_paddle(). Also, the portion gameManager.ball has
+                dissapeared, and replaced by the word self.
+                </p>
+                <p>
+                    And now, the ball will be in charge of executing all of its actions. We just need to ask for the
+                    ball.update() in the main function update():
+                </p>
+                <pre><code>
+        def update():
+            ...
+            # Game play:
+            # interaction paddle - screen
+            gameManager.paddle.update()
+            # update the ball
+            <b style="font-size: 1.2em;">gameManager.ball.update(gameManager.paddle)</b>
+            # interaction ball - block
+                </code></pre>
+                <p>
+                    If you wish, you can change the values of dx and dy, located in the def __init__ function of the
+                    GameObject class, from 0.1 to higher values to increase the speed of the ball.
+                </p>
+            </div>
+            <div class="text-center m-3">
+                <img src="./images/Chapter_4/1.gif" style="width: 40%; height: auto;" class="img-fluid text-center"
+                    alt="">
+            </div>
+            <h2 class="text-start m-5">Interaction ball - block(s)</h2>
+            <p>
+                There is really one more step to make our game playable, and it involves bouncing the
+                ball against the blocks, and destroying the blocks. We can take two approaches, by either adding a new
+                function that passes the ball to a collection of blocks (the list gameManager.walls), or
+                by passing a collection of blocks to a new function inside the ball. We will use the first approach
+                because:
+            <ul>
+                <li>it involves passing a ball to a function instead of a collection of objects</li>
+                <li>gives us the opportunity to create a helper function directly inside the gameManager</li>
+            </ul>
+            </p>
+            <p>
+                In the main update() function, we will create a new function called <b>gameManager.update_blocks()</b>.
+            <pre><code>
+    def update():
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit() 
+            if event.type == pygame.KEYDOWN:
+                gameManager.paddle.userInput(event)
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    gameManager.paddle.direction = [0,1,0]
+        # Game play:
+        # interaction paddle - screen
+        gameManager.paddle.update()
+        # update the ball
+        gameManager.ball.update(gameManager.paddle)
+        # interaction ball - block
+        <b style="font-size: 1.2em;">gameManager.update_blocks()</b>
+                </code></pre>
+            </p>
+            <p>
+                Then, inside the GameManager class, we create our function update_blocks():
+            <pre><code>
+    def update_blocks(self):
+        for block in self.walls:
+            if block.rect.colliderect(self.ball):
+                # Calculate overlap distances
+                <b style="font-size: 1.1em;color: #1f7572;">overlap_left = self.ball.rect.center[0] - block.rect.left</b>
+                <b style="font-size: 1.1em;color: #1f7572;">overlap_right = block.rect.right - self.ball.rect.center[0]</b>
+                <b style="font-size: 1.1em;color: #1f7572;">overlap_up = self.ball.rect.center[1] - block.rect.top</b>
+                <b style="font-size: 1.1em;color: #1f7572;">overlap_bottom = block.rect.bottom - self.ball.rect.center[1]</b>
+                edge_distance = min (overlap_right,overlap_bottom,overlap_left,overlap_up)
+                # RIGHT BOUNCE
+                <b style="font-size: 1.2em;color: #793600;">if edge_distance == overlap_right:</b>
+                    <b style="color: #af5d1a;">self.ball.dx = abs(self.ball.dx)</b>
+                # BOTTOM BOUNCE
+                <b style="font-size: 1.2em;color: #793600;">if edge_distance == overlap_bottom:</b>
+                    <b style="color: #af5d1a;">self.ball.dy = abs(self.ball.dy)</b>
+                # LEFT BOUNCE
+                <b style="font-size: 1.2em;color: #793600;">if edge_distance == overlap_left:</b>
+                    <b style="color: #af5d1a;">self.ball.dx = -abs(self.ball.dx)</b>
+                # UP BOUNCE
+                <b style="font-size: 1.2em;color: #793600;">if edge_distance == overlap_up:</b>
+                    <b style="color: #af5d1a;">self.ball.dx = -abs(self.ball.dx)</b>
+                    
+                self.walls.remove(block)
+                </code></pre>
+            </p>
+            <p>
+                Yowza! The above code snippet definitely requires a more detailed explanation. The
+                ball should bounce differently depending on the edge hit by the ball. So first we calculate the distance
+                from the center of the ball to each of the block's edges, and apply the right change in velocity
+                depending on which one is closer. The edges of a block are integers, not coordinates x and y. For the
+                right and left edges, we get a value in x of those edges, and a value in y for the top and bottom edges:
+            </p>
+            <div class="text-center m-3">
+                <img src="./images/Chapter_4/1.png" style="width: 80%; height: auto;" class="img-fluid text-center"
+                    alt="">
+            </div>
+            <p>
+                What makes the code look complicated may be the squared brackets "[]"
+                in the first bit, and the fact we're using a coordinate system. The brackets represent the x (with [0])
+                and y
+                (with [1]) elements from the ball's current
+                position. We use them to compare the x of the ball against the x of the block for the right and left
+                edge, and
+                then compare the y of the ball against the y of the block for the bottom and up edges.
+            </p>
+            <p>
+                After all of that effort, we can rejoice with a playable version of our game!
+            </p>
+        </div>
+    </div>
+
+
+    <script>
+        $("#navbarJQ").load("navbar.html");
+    </script>
+</body>
+
+</html>

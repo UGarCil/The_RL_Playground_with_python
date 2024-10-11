@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+</head>
+
+<body style="background-color: #eee0d5; color: #460d0d;">
+    <!-- ############### Insert NAVBAR with jQuery ############## -->
+    <div id="navbarJQ"></div>
+    <!-- ############### Edit text elements in this page ############## -->
+    <div class="container ">
+        <div class="row pt-5">
+            <div class="col-lg-4">
+                <img class="img-fluid" style="width:80%; height: auto;" src="./images/main_logo.png" alt="">
+            </div>
+            <div class="col-lg-8 align-items-center d-flex abc">
+                <span style="font-size: 2em;">Chapter 1</span> - <span style="font-size: 1.2em"> Installations</span>.
+            </div>
+            <div class="row-lg-12 pt-5">
+                <p>
+                    Python is nowadays one of the most widely used and popular programming languages because of its
+                    simple syntax, straightforward installation, and the support received from the community. Python has
+                    many
+                    powerful open
+                    source projects that are easy to install and deploy, making it useful for a wide range of areas;
+                    from research to digital art.
+                </p>
+                <p>
+                    In recent years, Python has also become a preferred choice for enthusiasts in the area of
+                    machine learning, with the production of modules that allow users to download and deploy custom AI
+                    pipelines for almost any form of deep learning, including the training of agents capable to learn
+                    from their environment and solve tasks.
+                </p>
+                <p>
+                    We will begin our course with a general guide on how create simple worlds using the library Pygame.
+                    Pygame is a special module that allows for the manipulation of pixels in real time and the
+                    integration of user input, making it particularly useful for the creation of games and simple GUIs.
+                </p>
+
+            </div>
+            <div class="row-lg-12 pt-5">
+                <img class="img-fluid" src="./images/Chapter_1/0.png" alt="">
+            </div>
+
+            <div class="row-lg-12 pt-5">
+                <!-- <pre><code>
+                def hello_world():
+                    print("Hello, world!")
+                </code></pre> -->
+                </p>
+                <p>
+                    One of the main concerns when people begin their journey with Pygame is that, compared to more
+                    formal
+                    game engines like Unity, Godot or UnrealEngine, Pygame doesn't have an integrated user interface
+                    allowing
+                    users to place objects directly in the game. Because everything is done numerically and
+                    programmatically, the
+                    user often feels discouraged by the overwhelming amount of effort that goes into manually placing
+                    objects, even before the actual game rules can be coded.
+                </p>
+
+                <p>
+                    With the purpose of helping solve this issue, we have created a simple graphic user interface (GUI)
+                    for this course. The <b style="font-size:1.2em;">rlpp_designer</b> is a GUI interface that is part
+                    of the "Reinforcement Learning with Pygame and Python" library designed for this book (<b
+                        style="font-size:1.2em;">rlpp</b>).
+                    We will use the designer to facilitate the manual placement of objects in our Pygame window. Once
+                    the game objects have been properly configured in space, we can export our project to begin the
+                    coding process that applies the rules to our games.
+                </p>
+                <div class="text-center">
+                    <img src="./images/Chapter_1/10.png" style="width: 50%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+            </div>
+            <div class="row-lg-12 pt-5">
+                <h1 class="text-center">Installations</h1>
+                </p>
+                <p>
+                    There are a couple of libraries needed, and a Python installation will also be required. As for
+                    October 2024, the latest version of Python is 3.12 (we've come a long way!!!).
+                </p>
+
+
+                <p>
+                    There are two main ways to install Python in our operative system (Linux, Window or MacOS). A <a
+                        href="https://www.python.org/downloads/"> standalone version </a>will install the executable
+                    files for Python in your computer, along with some very important libraries that allow Python to
+                    communicate with multiple parts of your machine. This form of installing Python is perfect if you
+                    will destine your Python applications to only certain types of projects. Examples include:
+                <ul class="text-left">
+                    <li>Running a server to maintain a website using the library Flask</li>
+                    <li>Using Python for simple programs that make use of the default libraries like random, or math
+                    </li>
+                    <li>Using a particular library, downloaded from the Python Package Index (PyPI) via pip, with the
+                        intention of mostly using Python for the application(s) that require such library (or libraries)
+                    </li>
+                </ul>
+                </p>
+
+                <p>
+                    The issue with a standalone installation is that over time, some libraries can go out of date
+                    (once Python installs them, libraries are not automatically updated). As the field moves forward,
+                    new libraries are released that require the same library you already have, but in a higher version!
+                </p>
+                <p>
+                    But why is this a problem? While most of the time the libraries don't conflict each other, sometimes
+                    they do, and you would need to decide which project will be sacrificed and will no longer be able to
+                    run in your machine.
+                </p>
+                <p>
+                    While several solutions exist for this conundrum, the most widely adopted technique is to
+                    encapsulate your versions of Python into what is known as an environment. An environment is a bubble
+                    that keeps the packages enclosed with all libraries at a specific version. While it is possible (and
+                    advisable) to make use of Python venv, we recommend the use of a more sophisticated environment
+                    manager called Anaconda.
+                </p>
+                <h1 class="text-center">Installing Anaconda</h1>
+                <p>
+                    Anaconda comes in two versions: conda and miniconda. The difference, as the name may suggest, is
+                    related to the amount of space in the computer the final installation will take. While conda
+                    installs over 1,000 libraries along with Python (conda is often used in computer science), miniconda
+                    only installs the basic stuff. For traditional desktops like laptops and workstations, conda is
+                    often the way to go, simply because there are less libraries to install from the beginning.
+                </p>
+                <p>
+                    To install conda, you can access the oficial <a
+                        href="https://www.anaconda.com/download/success">Anaconda Distribution's website</a>.
+                </p>
+                <img src="./images/Chapter_1/1.png" class="img-fluid" alt="">
+                <p>
+                    Once you download the executables required for your operative system, you can open the installer. By
+                    doing so, the program will define a path in your computer to download the files, and it will provide
+                    options for the type of permissions that Anaconda (and Python) will have from there on.
+                </p>
+                <div class="text-center">
+                    <img src="./images/Chapter_1/2.png" style="width: 40%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    One of the most important elements in this menu is the option <b>Register Anaconda3 as the system
+                        Python 3.12</b>. Enabling this box will make the installation of Python in coding editors
+                    easier.
+                </p>
+                <p>
+                    With your installation complete, it's time to use Anaconda for the first time. You can interact with
+                    Anaconda with a Terminal window. The Terminal window is another view of your computer that relies
+                    only
+                    in text ASCII input, and represents the backend, or raw view, of your operative system. While some
+                    tasks are not as enjoyable to do only by typing commands into a black screen, a Terminal is
+                    essential when working with programming languages and changing things in our machine
+                    programmatically (using computer logic).
+                </p>
+                <p>
+                    But wait! It could be dangerous giving Anaconda complete access to the Terminal window because it
+                    could override other versions of Python that are needed by other programs to run (even if such
+                    programs don't seem to have anything to do with Python). One of the biggest examples is the
+                    rendering and 3D modeling software Blender, which requires Python 3 to run.
+                </p>
+                <img src="./images/Chapter_1/3.png" class="img-fluid" alt="">
+                <p>
+                    Instead of using the Terminal Window directly, Anaconda installs a special version of Terminal
+                    called the Anaconda Prompt. In this window you will notice the following line:
+                <pre><code>
+                (base) C:\Users\MyUserName
+                </code></pre>
+                </p>
+
+                <p>
+                    Here, (base) represents the current <b style="font-size: 1.2em;">environment</b> we're in. This
+                    means we have access to a particular version of Python (3.12 if Anaconda was installed late in the
+                    year 2024) and many libraries associated with it. To get access to the libraries installed in the
+                    based environment, we can run:
+                </p>
+
+                <pre><code>
+                    conda list
+                    </code></pre>
+
+                <div class="text-center">
+                    <img src="./images/Chapter_1/4.png" class="img-fluid" style="width: 50%;height: auto;" alt="">
+                </div>
+
+                <p>
+                    Here we can see the list of libraries that are associated with our environment <b>base</b>. However,
+                    the library Pygame is not in the list by default, and that provides an opportunity to generate our
+                    first environment.
+                </p>
+
+                <h1 class="text-center">Creating an environment that contains Pygame</h1>
+
+                <p>
+                    As previously mentioned, Pygame is a special library that allows the user to create game-like
+                    applications. To create our first environment we can open the Anaconda prompt terminal and type:
+                <pre><code>
+                        conda create --name pygame_env python=3.9
+                        </code></pre>
+
+                The program will then connect with the Anaconda repository via internet to find the package to install
+                (Python) at the desired version (3.9), at which point it will then ask for confirmation on whether to
+                install the packages found, asking us to type <b>y</b>. Instead of base, the name of our new environment
+                will be <b>pygame_env</b> .
+                </p>
+                <div class="text-center">
+                    <img src="./images/Chapter_1/5.png" class="img-fluid" style="width: 60%;height: auto;" alt="">
+                </div>
+                <p>
+                    Once the new environment has been created, we can activate it with the command:
+
+                <pre><code>
+                        conda activate pygame_env
+                        </code></pre>
+                </p>
+                <div class="text-center mb-5">
+                    <img src="./images/Chapter_1/11.png" class="img-fluid" style="width: 30%;height: auto;" alt="">
+                </div>
+                <p>
+                    Notice the (base) has been replaced for the name of our new environment (pygame_env). This is
+                    important and is letting us know we are using and modifying that specific version of Python.
+                </p>
+                <p>
+                    The next step is to install the Pygame library. The good news is that the rlpp library will install
+                    it for you along with the GUI rlpp_designer. Although the rlpp library can't be found by Anaconda,
+                    we can
+                    easily install it
+                    using the official Python's package installer (pip):
+                </p>
+
+                <pre><code>
+                        pip install rlpp==0.4.2
+                        </code></pre>
+                </p>
+
+                <div class="text-center mb-5">
+                    <img src="./images/Chapter_1/12.png" class="img-fluid" style="width: 80%;height: auto;" alt="">
+                </div>
+
+
+                <p>
+                    The <b>Reinforcement Learning with Pygame and Python</b> package will install the libraries
+                    Pygame, and pyQt5, which it requires to run smoothly.
+                </p>
+                <p>
+                    Once rlpp is installed, you can prompt the <b>rlpp_designer</b> by simply typing its name in the
+                    terminal,
+                    as long as you are in the environment that contains the installation for rlpp:
+                <pre><code>
+                    rlpp_designer
+                    </code></pre>
+                </p>
+                <div class="text-center mb-5">
+                    <img src="./images/Chapter_1/13.png" class="img-fluid" style="width: 80%;height: auto;" alt="">
+                </div>
+
+                <h1 class="text-center">We will need a code editor</h1>
+                <p>
+                    We can modify our Python code using an IDE (Integrated Development Editor). Being integrated means
+                    there will be a button in our window connecting our Python code with the Interpreter (the actual
+                    component that runs the code).
+                </p>
+                <p>
+                    While many editors exist, we suggest using vscode because of it lightweight and popularity in the
+                    community of programmers. VsCode also integrates Anaconda environments quite easily and supports the
+                    integration of additional programming languages. You can find the installer for vscode that best
+                    matches your OS <a href="https://code.visualstudio.com/download">here</a>.
+                </p>
+                <div class="text-center mb-5">
+                    <img src="./images/Chapter_1/14.png" class="img-fluid" style="width: 80%;height: auto;" alt="">
+                </div>
+                <p>
+                    Once vscode is installed in your device, we need to somehow connect it with the Python interpreter.
+                    Actually, it would be great to connect the editor with <b>all of the interpreters found across our
+                        Anaconda environments</b>. To achieve this, look at the diagram below:
+                </p>
+                <div class="text-center mb-5">
+                    <img src="./images/Chapter_1/15.png" class="img-fluid" style="width: 80%;height: auto;" alt="">
+                </div>
+                <p>
+                    The arrow (A) indicates the "Run" button. If you see it, it means vscode is successfully linked to
+                    Anaconda.<br>
+                    Otherwise, you can enable it by installing the extension for Python (B), which can be found after
+                    typing Python in the search box of the <b>Extensions</b> button (C).
+                </p>
+
+                <h1 class="text-center">One last thing before we begin...</h1>
+                <p>
+                    We are almost ready to begin our journey! Congratulations if you made it this far in the
+                    installation process. Installations and compatibility across programs and platforms is an area where
+                    computer specialists spend a lot of time and it's certainly not always fun. However, if we want to
+                    train artificial intelligence, we need a
+                    special library. Python has become one (or the most) widely used programming language for AI
+                    enthusiasts
+                    because of the libraries pytorch and tensorflow, and because most research groups that come up with
+                    innovation in the field of AI make their projects open source and available via one of these two
+                    packages.
+                </p>
+                <p>
+                    In this book we will focus our efforts on training agents using pytorch. there is no real difference
+                    between pytorch and tensorflow other than the initial preference that quickly turns into a habit.
+                </p>
+                <p>
+                    To install pytorch we need to go to the <a href="https://pytorch.org/get-started/locally/"> official
+                        documentation page</a>, where we will need to select the best configuration for our computer.
+                </p>
+                <div class="text-center">
+                    <img src="./images/Chapter_1/7.png" class="img-fluid" style="width: 70%;height: auto;" alt="">
+                </div>
+                <p>
+                    if you are lucky enough to have an NVIDIA gpu you can select the cuda version for it. The CUDA
+                    software
+                    refers to the software that wraps around the GPU to enable users to access it via a suite of
+                    packages
+                    located in the CUDA-toolkit. By installing these components we will have the power to change the
+                    normal
+                    behavior of a gpu, which normally works only with graphics, to also train neural networks.
+                </p>
+                <p>
+                    The right CUDA version to choose depends greatly on the model and the year in which your device was
+                    released, and you can look into the official <a href="https://developer.nvidia.com/cuda-gpus"> GPU
+                        Compute Capability specs</a> provided by NVIDIA. As a general rule for pytorch, install CUDA
+                    version
+                    11.8 for GPUs below compute capability 7. For most users with GeForce GPUs, commonly installed in
+                    gaming
+                    laptops, this is the way to go.
+                </p>
+                <div class="text-center mb-5"><img src="./images/Chapter_1/8.png" class="img-fluid"
+                        style="width: 70%;height: auto;" alt="">
+                </div>
+                <h1 class="text-center">What if my computer doesn't have an NVIDIA GPU?</h1>
+                <p>
+                    If your device doesn't have an NVIDIA gpu you can still use pytorch, you just need to make sure to
+                    select the <b>CPU</b> option
+                    instead of CUDA in the Compute Platform option.
+                </p>
+                <p>
+                    Once we make our selections, we can copy the command displayed by pytorch in our Anaconda prompt
+                    window.
+                    <b style="font-size:1.2em">Please make sure the environment Pygame_env is active</b>:
+                <pre><code>
+                conda install pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia
+                    </code></pre>
+
+                </p>
+                <div class="text-center mb-5"><img src="./images/Chapter_1/9.png" class="img-fluid"
+                        style="width: 70%;height: auto;" alt="">
+                </div>
+                <p>
+                    With the installations now complete, we are ready to begin our journey with Reinforcement Learning
+                    and
+                    Pygame!
+                </p>
+            </div>
+        </div>
+
+
+    </div>
+    </div>
+
+
+    <script>
+        $("#navbarJQ").load("navbar.html");
+    </script>
+</body>
+
+</html>

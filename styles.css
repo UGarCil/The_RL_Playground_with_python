@@ -6,11 +6,18 @@
 }
 
 body{
-    font-size: 1.2em;
+    font-size: 1.5em;
     color: #ffffff;
     background-color:#292626;
+    
 }
 
 .navbar{
   color:green
+}
+
+.abc {
+  font-family: "ABeeZee", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }

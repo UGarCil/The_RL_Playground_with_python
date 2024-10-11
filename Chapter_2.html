@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+</head>
+
+<body style="background-color: #c5d2d2; color: #032625;">
+    <!-- ############### Insert NAVBAR with jQuery ############## -->
+    <div id="navbarJQ"></div>
+    <!-- ############### Edit text elements in this page ############## -->
+    <div class="container ">
+        <div class="row pt-5">
+            <div class="col-lg-12 align-items-center d-flex abc">
+                <span style="font-size: 2em;">Chapter 2</span> - <span style="font-size: 1.2em"> Getting started with
+                    rlpp_designer</span>.
+            </div>
+            <div class="text-center">
+                <img src="./images/rlpp_designer_logo.png" style="width: 50%; height: auto;"
+                    class="img-fluid text-center" alt="">
+            </div>
+            <div class="text-center">
+                <iframe width="70%" height="420" src="https://www.youtube.com/embed/hjFjMleT5oE?si=x_J5WUZy-NDVGcuL"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+
+            <div class="row-lg-12 pt-5">
+                <p>
+                    The rlpp_designer is an example of a graphic user interface (GUI). A GUI is a tool that helps users
+                    control the behavior of a program by using buttons instead of having to manually enter code to
+                    produce the same result. Even for experienced programmers, having a GUI application is a time saver,
+                    allowing them to focus their attention in the most important parts of the program. Our rlpp_designer
+                    will help us create a layout of our worlds by helping us visualize the position and type of objects
+                    that make our game, so we can export our project afterwards, and reimport it as Python code.
+                </p>
+                <p>
+                    Let's begin by opening our GUI. Open the Anaconda prompt, activate the environment, and run the
+                    rlpp_designer command:
+                <pre><code>
+                    conda activate pygame_env 
+                    rlpp_designer
+                </code></pre>
+                </p>
+                <!-- <div class="text-center mt-5 mb-5">
+                    <img src="./images/Chapter_2/1.png" style="width: 80%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div> -->
+                <p>
+                    Our GUI is divided in three subpanels:
+                </p>
+                <div class="text-center mt-5 mb-5">
+                    <img src="./images/Chapter_2/2.png" style="width: 80%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    The Pygame panel represents our canvas, and a preview of how our game will begin once we export it.
+                </p>
+                <h2 class="text-start pt-5 pb-5">Tools bar</h2>
+                <p>
+                    Let's go through the icons included in the tools bar:
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">The cursor icon
+                        means SELECT mode, allowing the user to click on elements already in the game to apply new
+                        transformations as desired. The keyboard shortcut is the "Esc" key</div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/select.png" class="img-fluid" alt="select icon"
+                            style="width: 40%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">The STAMP tool is
+                        used to clone elements already present in the Pygame preview panel, copying attributes like
+                        rotation</div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/stamp.png" class="img-fluid" alt="select icon"
+                            style="width: 40%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">The TRASH tool will
+                        erase any element selected in the Pygame preview window</div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/trash.png" class="img-fluid" alt="select icon"
+                            style="width: 40%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">The ROTATE tool
+                        will transform the image by rotating it 90 degrees in a clockwise direction</div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/rotate.png" class="img-fluid" alt="select icon"
+                            style="width: 40%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">The MOVE tool will
+                        transform the position of any selected sprite to a new desired location within the Pygame
+                        preview window</div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/move.png" class="img-fluid" alt="select icon"
+                            style="width: 40%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-12 p-3" style="background-color: #9cacac; border-radius: 2%;">And finally, as a
+                        somewhat hidden tool, you can also modify the scale of your sprites by using the mouse scroller
+                    </div>
+                </div>
+                </p>
+
+                <h2 class="text-start pt-5 pb-5">Sprites panel</h2>
+
+                <p>
+                    The sprites panel contains prefabs of the sprites that make your game. At its current version 0.4.2,
+                    rlpp_designer includes 4 sprite categories:
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">
+                        <b style="font-size: 1.5em;">Agents</b> are the main characters, or protagonist(s) in your
+                        games. They are called agents because of the role they play when building reinforcement learning
+                        AI applications.
+                    </div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/agent.png" class="img-fluid" alt="select icon"
+                            style="width: 80%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">
+                        <b style="font-size: 1.5em;">Walls</b> represent the boundaries of the world, and are often
+                        associated with penalties or rewards when the agents make contact with them. Some walls are
+                        static, meaning their position cannot be modified, but it's also common for the agent to destroy
+                        walls.
+                    </div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/wall.png" class="img-fluid" alt="select icon"
+                            style="width: 80%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">
+                        When the user doesn't fight against the environment, <b style="font-size: 1.5em;">Enemies</b>
+                        are often the main challenge in our games. From big to small, their purpose is to antagonize the
+                        player. A player's interaction with an enemy often reduces points and terminates the game.
+                        Enemies may represent also a special type of agent in reinforcement learning, enabling the
+                        programmer to create adversarial networks where the main agent learns to defeat the enemy, while
+                        the enemy learns to defeat the main agent.
+                    </div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/enemy.png" class="img-fluid" alt="select icon"
+                            style="width: 80%; height: auto;">
+                    </div>
+                </div>
+                <div class="row align-items-center m-3">
+                    <div class="col-lg-10 p-3" style="background-color: #9cacac; border-radius: 2%;">
+                        <b style="font-size: 1.5em;">Food</b> is the main source of gathering a reward in games,
+                        allowing the agent to associate certain behaviors as positive in relation to its environment.
+                        Although food items are often static, sometimes other agents can be food, enabling more
+                        complex interactions.
+                    </div>
+                    <div class="col-lg-2 text-center p-5" style="background-color: #2b4242; border-radius: 10%;">
+                        <img src="./images/food.png" class="img-fluid" alt="select icon"
+                            style="width: 80%; height: auto;">
+                    </div>
+                    <div class="col-12 pt-5 pb-5">
+                        <p>
+                            Let's familiarize ourselves with the designer by going over an exercise together, using the
+                            legendary game Breakout as an example!
+                        </p>
+                    </div>
+                </div>
+                </p>
+
+                <h1 class="text-center m-5">Breakout</h1>
+                <div class="text-center mb-5 p-5" style="background-color: #a3b3b3;">
+                    <img src="./images/Chapter_2/0.png" style="width: 50%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    Few games are as iconic as Breakout. Originally released for the Atari game console in 1976, the
+                    game involves four types of elements:
+                <ul>
+                    <li>paddle (agent)</li>
+                    <li>ball ("food")</li>
+                    <li>blocks (wall)</li>
+                    <li>edges (wall)</li>
+                </ul>
+                The purpose of the game is to destroy all the blocks while preventing the ball from falling below the
+                bottom edge of the screen and paddle.
+                </p>
+                <p>
+                    To create your game setup:
+                <ul>
+                    <li>With the designer open, navigate to the agents subpanel located in the sprites panel. You will
+                        find
+                        a blue agent that will always be loaded by default when you start the application.</li>
+                    <li>Click the "+" button at the bottom of the agents subpanel to import a new sprite</li>
+                    <li>Enter the subfolder agents and select the paddle. If the paddle is too small, move up some
+                        directories to find the same images at different resolutions at:
+                        <pre><code>
+                            ...\rlpp\resources\
+                        </code></pre>
+                        I've found res_128 to be a good resolution
+                    </li>
+                    <div class="text-center m-3">
+                        <img src="./images/Chapter_2/3.png" style="width: 50%; height: auto;" class="img-fluid" alt="">
+                    </div>
+                    <li>Once the sprite has been loaded, it will be displayed as a button below the default agent icon.
+                        You can now click on it and drag it within the Pygame preview
+                        <div class="text-center m-3">
+                            <img src="./images/Chapter_2/4.png" style="width: 50%; height: auto;"
+                                class="img-fluid text-center" alt="">
+                        </div>
+
+                    </li>
+                    <li>Move to the <b>food</b> subpanel and import the ball. If the ball is too big you can use the
+                        mouse scroller to increase or decrease its size</li>
+                    <li>Move to the <b>walls</b> subpanel and place the blocks at the position of your choice. You may
+                        want to consider changing the resolution of the blocks by using the scroller, or finding the
+                        same blocks at a different resolution in the folder ...\rlpp\resources</li>
+
+                </ul>
+
+                </p>
+                <p>
+                    Here is a suggested layout for the blocks, ball and paddle for our game.
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_2/5.png" style="width: 50%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    Once the layout of our game is done, it's time to export our work. Go to the menu bar (top left
+                    corner of the application window) and click on Export, then <b>As regular Pygame objects</b>. This
+                    will open a new dialog to store the file <b>config.json</b>. We encourage you to create a new folder
+                    with the name of your project to store the config.json file:
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_2/6.png" style="width: 50%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>If you navigate to your folder, you will now find a config.json file and a folder <b>images</b> with
+                    the images for the sprites used to build the game layout</p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_2/7.png" style="width: 50%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+
+
+                <h1 class="text-center m-5">Processing our config.json file</h1>
+                <p>
+                    The file config.json looks strange, especially if it's the first time you see it. The json format is
+                    a
+                    special type of document that is compatible across many applications, as it was originally created
+                    to have a standarized way to share documents over the internet while keeping it humanly readable. A
+                    config.json looks something like
+                    this:
+                <pre><code>
+                        {
+                            "foods": [
+                                {
+                                    "position": [
+                                    148,
+                                    390
+                                    ],
+                                    "angle": 0,
+                                    "img_path": "C:/Users/Uriel/Desktop/rlpp_test/Breakout\\images\\128_ball_32_32.png",
+                                    "object_type": "food",
+                                    "scale_factor": 1
+                                }
+                             ]
+                        }
+                    </code></pre>
+                The file represents a collection of objects stored in a list called "foods". This list contains the
+                metadata built by the program, representing the properties we need to know about an object to place it
+                in the actual Pygame program.
+                </p>
+                <p>
+                    Let's begin by opening vscode (or our coding editor of choice) in the folder that contains the
+                    config.json file. Once there, create a new python file and open it with the editor. A good name for
+                    the file could be <b>processing_metadata.py</b>
+                </p>
+                <p>
+                    It's time to write our first script! Our program needs to:
+                <ul>
+                    <li>call a special function called map_json(), which can be imported from the rlpp.processor
+                        submodule.</li>
+                    <li>pass the location for the config.json file to the function</li>
+                </ul>
+
+                Here's a Python version of our algorithm:
+                <pre><code>
+                        from rlpp.processor import map_json
+                        map_json("./config.json")
+                    </code></pre>
+                Once the script is written, execute it to create a new file called output.py.
+                </p>
+
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_2/8.png" style="width: 70%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    Congratulations! If the process ran smoothly, you now have a template with your layout to begin the
+                    programming process! Access the output.py file, and run it!
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_2/9.png" style="width: 70%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <h1 class="text-center m-5">Making things move...</h1>
+                <p>
+                    Our <b>output.py</b> file contains our game. The general structure of pygame requires us to
+                    define a gameObject. A gameObject is defined by:
+                <ul>
+                    <li>An image</li>
+                    <li>A hitbox to detect collisions, known as a "rect" in Pygame</li>
+                    <li>a function draw to render the pixels that represent the image</li>
+                    <li>a function update to change properties of the gameObject</li>
+                    <li>Any other imaginable set of attributes and methods...</li>
+                </ul>
+                <pre><code>
+class GameObject():
+    def __init__(self,position, angle, object_type, img_path,scale_factor):
+        ---- things that define our game object go here ---- 
+        
+    def draw(self, display):
+        ---- things that help drawing this object in pixels go here ---- 
+        
+    def turnClockwise(self, degrees=0):
+        ---- a special action that takes care of the rotation specified by the user in the designer, if any ----     
+
+    def scale(self):
+        ---- a special action that takes care of the scale specified by the user in the designer, if any ----     
+
+                    </code></pre>
+                </p>
+                <p>
+                    Luckily, our program already contains a definition for a GAME_OBJECT. A combination of GAME_OBJECT
+                    has to be managed every frame, tracking things like:
+                <ul>
+                    <li>Frames per second</li>
+                    <li>updating all the game objects</li>
+                    <li>organizing the game objects</li>
+                    <li>receiving and controlling user input</li>
+                    <li>keeping scores, removing agents, etc.</li>
+                </ul>
+                And so, we have also a definition of a <b style="font-size: 1.2em;">GAME_MANAGER</b>. When we say we
+                "run" our game, we mean creating and accessing this object.
+                </p>
+
+                <pre><code>
+class GameManager():
+    def __init__(self):
+        ---- calls the reset method to initialize the objects for the first time -----
+        
+    def reset(self):
+        ---- defines all of the agents, walls, etc., defined by the user -----
+                    
+                </code></pre>
+            </div>
+            <p>
+                In the near future, when we begin creating agents for AI, we will see how this object GAME_MANAGER
+                completely encapsulates our game implementation, but for now this structure is better for us because is
+                simpler.
+            </p>
+
+
+        </div>
+
+    </div>
+    </div>
+
+
+    <script>
+        $("#navbarJQ").load("navbar.html");
+    </script>
+</body>
+
+</html>
