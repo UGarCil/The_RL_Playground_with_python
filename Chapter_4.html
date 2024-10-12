@@ -15,29 +15,33 @@
     <!-- ############### Edit text elements in this page ############## -->
     <div class="container ">
         <div class="row pt-5">
-            <div class="col-lg-12 align-items-center d-flex abc">
+            <div class="col-lg-3">
+                <img class="img-fluid" style="width:80%; height: auto;" src="./images/main_logo.png" alt="">
+            </div>
+            <div class="col-lg-9 align-items-center d-flex abc">
                 <span style="font-size: 2em;">Chapter 4</span> - <span style="font-size: 1.2em"> Editing our game
                     layout: Velocity and Collisions</span>.
             </div>
-            <!-- <div class="text-center">
-                <iframe width="70%" height="420" src="TODO" title="YouTube video player" frameborder="0"
+
+            <div class="text-center mt-5">
+                <iframe width="70%" height="420" src="https://www.youtube.com/embed/Al1w-gc5cZ8?si=6mNuQ2FN33za0MQ9" title="YouTube video player" frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            </div> -->
+            </div>
 
 
             <div class="row-lg-12 pt-5">
-                <p>
-                    In this chapter we will focus on the ball from our <b>Breakout</b> project. We will add collision
-                    behavior to the ball and make it bounce against the paddle
-                </p>
                 <p>
                     Our game is taking shape! In the last chapter we updated the output.py file to make the paddle
                     listen to the user, and now it's time to edit the ball. At this stage, it may be useful to outline
                     the things that have to happen in our game.
                 </p>
                 <p>
-                    Whenever you create a game-like environment, I always recommend students to create a diagram that
+                    In this chapter we will focus on the ball from our <b>Breakout</b> project. We will add collision
+                    behavior to the ball and make it bounce against the paddle
+                </p>
+                <p>
+                    Whenever we discuss how to create a game-like environment, I always recommend students to create a diagram that
                     outlines the type of interactions between the components that make the game.
                 </p>
                 <div class="text-center m-3">
@@ -95,7 +99,7 @@
                 # interaction ball - screen
                 <b style="font-size: 1.2em;">gameManager.ball.update_collision_screen()</b>
                 # interaction ball - block
-                <b style="font-size: 1.2em;">gameManager.ball.update_collision_blocks(gameManager.walls)</b>
+                <b style="font-size: 1.2em;">gameManager.update_blocks()</b>
                 
                             
                             
@@ -115,7 +119,7 @@
                     <b>
                 def update_collision_paddle(self,paddle):
                     if self.rect.colliderect(paddle):
-                    self.dy = -abs(self.dy)
+                        self.dy = -abs(self.dy)
                         
                     </b>
                 </code>
@@ -127,7 +131,7 @@
                     the velocity of the ball changes, always becoming negative.
                 </p>
                 <p>
-                    The reason for the negative value of the ball has to do with how Pygame adds pixels, and rows of
+                    The reason for the negative value of the ball's vertical velocity has to do with how Pygame adds pixels, and rows of
                     pixels, to the screen. The way it does it is by adding elements from top to bottom, from left to
                     right. So, the first row with value 0 (programmers also count starting at 0) is the top edge of the
                     screen. If we want the ball to go up then the velocity has to be negative.
@@ -251,7 +255,7 @@
             </div>
             <h2 class="text-start m-5">Interaction ball - block(s)</h2>
             <p>
-                There is really one more step to make our game playable, and it involves bouncing the
+                There seems to be only one more step to make our game playable, and it involves bouncing the
                 ball against the blocks, and destroying the blocks. We can take two approaches, by either adding a new
                 function that passes the ball to a collection of blocks (the list gameManager.walls), or
                 by passing a collection of blocks to a new function inside the ball. We will use the first approach
