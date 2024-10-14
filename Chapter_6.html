@@ -22,12 +22,12 @@
                 <span style="font-size: 2em;">Chapter 6</span> - <span style="font-size: 1.2em"> Reinforcement
                     Learning: The Agent State</span>.
             </div>
-            <!-- <div class="text-center mt-5">
-                <iframe width="70%" height="420" src="https://www.youtube.com/embed/suUcX8fc0v8?si=D2pOKVO6gq5hHqP2"
+            <div class="text-center mt-5">
+                <iframe width="70%" height="420" src="https://www.youtube.com/embed/hSqANjfu3bU?si=-n6nyl0pZ-OEsoh5"
                     title="YouTube video player" frameborder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            </div> -->
+            </div>
 
 
             <div class="row-lg-12 pt-5">
@@ -201,8 +201,9 @@
                     True/False boolean into a binary value 1/0.
                 </p>
                 <p>
-                    What is left is merging the two vectors dangers_around and food_around into a single array with 7 elements.
-                    <pre><code>
+                    What is left is merging the two vectors dangers_around and food_around into a single array with 7
+                    elements.
+                <pre><code>
         def get_state(self, foods):
             dangers_around = self.get_dangers()
             food_around = self.get_food(foods)
@@ -211,8 +212,9 @@
                     </code></pre>
                 </p>
                 <p>
-                    We also need to remember to pass the foods list when we summon the method get_state from the Game Manager:
-                    <pre><code>
+                    We also need to remember to pass the foods list when we summon the method get_state from the Game
+                    Manager:
+                <pre><code>
         def update(self):
             [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
             for agent in self.agents:
@@ -242,7 +244,7 @@
                 </p>
                 <p>
                     And, finally, to inform the neural network its new input size is 7 for the state of our world.
-                    <pre><code>
+                <pre><code>
                                 
             SCREEN = (640,480)
             MAX_MEMORY = 100_000
