@@ -20,7 +20,7 @@
             </div>
             <div class="col-lg-9 align-items-center d-flex abc">
                 <span style="font-size: 2em;">Chapter 5</span> - <span style="font-size: 1.2em"> Reinforcement
-                    Learning</span>.
+                    Learning: The Agent Actions</span>.
             </div>
             <div class="text-center mt-5">
                 <iframe width="70%" height="420" src="https://www.youtube.com/embed/suUcX8fc0v8?si=D2pOKVO6gq5hHqP2"
@@ -198,7 +198,6 @@
                 self.memory = deque(maxlen=MAX_MEMORY) # popleft()
                 <b style="font-size: 1.2em;">self.model = Linear_QNet(WORLD_STATES, 256, ACTION_STATES)</b>
                 <b style="font-size: 1.2em;">self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)</b>
-                self.reset()
             
             def reset(self):
                 ...
@@ -251,7 +250,6 @@
                 <b style="font-size: 1.2em; color:green;"># interaction agent walls</b>
                 <b style="font-size: 1.2em; color:green;"># interaction agent food</b>
                 reward = 0
-                self.isDead = False 
                 score = 0
                 return reward, self.isDead, score
                     </code></pre>
@@ -293,7 +291,6 @@
         class Agent(GameObject):
             def __init__(self, position, angle, object_type, img_path, scale_factor):
                 ...
-                self.reset()
             
             def reset(self):
                 super().reset()
@@ -484,18 +481,19 @@
             def update(self):
                 [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
                 for agent in self.agents:
-                    # get numerical interpretation of environment
-                    previous_env = agent.get_state()
-                    # use model to predict a move
-                    new_move = agent.get_action(previous_env)
-                    # apply the move
-                    <b style="font-size: 1.2em; color: blueviolet;">reward, done, score = agent.play_step(new_move, self.foods)</b>
-                    # get new state from applied move
-                    new_env = agent.get_state()
-                    # train short memory
-                    agent.train_short_memory(previous_env, new_move, reward, new_env, done)
-                    # add results to memory
-                    agent.remember(previous_env, new_move, reward, new_env, done)
+                    if not agent.isDead:
+                        # get numerical interpretation of environment
+                        previous_env = agent.get_state()
+                        # use model to predict a move
+                        new_move = agent.get_action(previous_env)
+                        # apply the move
+                        <b style="font-size: 1.2em; color: blueviolet;">reward, done, score = agent.play_step(new_move, self.foods)</b>
+                        # get new state from applied move
+                        new_env = agent.get_state()
+                        # train short memory
+                        agent.train_short_memory(previous_env, new_move, reward, new_env, done)
+                        # add results to memory
+                        agent.remember(previous_env, new_move, reward, new_env, done)
                     </code></pre>
                 </p>
                 <h2 class="text-center m-5">Recap</h2>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+</head>
+
+<body style="background-color: #c5d2d2; color: #032625;">
+    <!-- ############### Insert NAVBAR with jQuery ############## -->
+    <div id="navbarJQ"></div>
+    <!-- ############### Edit text elements in this page ############## -->
+    <div class="container ">
+        <div class="row pt-5">
+            <div class="col-lg-3">
+                <img class="img-fluid" style="width:80%; height: auto;" src="./images/main_logo.png" alt="">
+            </div>
+            <div class="col-lg-9 align-items-center d-flex abc">
+                <span style="font-size: 2em;">Chapter 6</span> - <span style="font-size: 1.2em"> Reinforcement
+                    Learning: The Agent State</span>.
+            </div>
+            <!-- <div class="text-center mt-5">
+                <iframe width="70%" height="420" src="https://www.youtube.com/embed/suUcX8fc0v8?si=D2pOKVO6gq5hHqP2"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div> -->
+
+
+            <div class="row-lg-12 pt-5">
+                <p>
+                    In the previous Chapter we used the rlpp_designer to create a Pygame layout for our first
+                    reinforcement learning application. We encoded the actions the agent takes in our world, its rewards
+                    and penalties. This Chapter will focus on creating a representation of the agent's environment to
+                    help it
+                    navigate its surroundings. In some poetic manner of speech, we are giving eyes to our agent so they
+                    can see the world.
+                    We call an agent's surroundings the <b>state</b> of the agent.
+                </p>
+                <p>
+                    Neural networks accept arrays of numbers as input, so we need to find a way to represent the state
+                    as a collection of numbers. We will resort to binary arrays to represent chains of conditions,
+                    having 0 as "No" and 1 as "Yes".
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_6/0.png" style="width: 40%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    Although this may look like a one-hot-vector, it is not because there can be more than a single
+                    number 1. Our agent will be able to sense danger in its surroundings, and perceive where the closest
+                    food item is relative to the whole map. In the illustration above our agent will be able to see the
+                    immediate danger to its left, front and right directions represented by the red areas around the
+                    agent. If there is a wall in any of those areas we represent those positions
+                    with 1. For the food we first sort the food list to find the one item that is closest, then map that
+                    food
+                    item's position relative to the position of the agent. The food can be East, South, West or North
+                    to the agent. It sounds like we need two helper functions...
+                </p>
+                <p>
+                    We begin by summoning two helper functions inside the <b>get_state()</b> method of the class Agent:
+                <pre><code>
+        def get_state(self, <b style="font-size:1.2em;">foods</b>):
+            <b style="font-size:1.2em;">dangers_around = self.get_dangers()</b>
+            <b style="font-size:1.2em;">food_around = self.get_food(foods)</b>
+            <strike>state = [0,0,0,0]</strike>
+            return np.array(state, dtype=float)
+                
+                    </code></pre>
+                </p>
+                <p>
+                    Notice the method self.get_food need a list of the food items, so we add the foods argument to the
+                    get_state() method. At this point, we can erase the default state variable that came with the
+                    template.
+                </p>
+
+                <h2 class="text-center m-5">Evaluating dangers</h2>
+                <p>
+                    Let's create the method get_dangers() inside our Agent class. Whether our agent is in a collision
+                    course against the wall depends on the combination of two parameters:
+                <ul>
+                    <li>The direction the agent is going</li>
+                    <li>Its position in the map</li>
+                </ul>
+                As an example, let's take a look at the following case:
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_6/1.png" style="width: 90%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    In this example, the position of the agent in the map is the same, but its current cardinal
+                    direction determines the type of danger that lies ahead. Let's map these cases in our function:
+                <pre><code>
+                        def get_dangers(self):
+                        danger_vector = [0,0,0]
+                        danger_EAST = int((self.x + SPEED) + (self.image.get_width()//2) >= SCREEN[0])
+                        danger_SOUTH = int((self.y + SPEED) + (self.image.get_height()//2) >= SCREEN[1])
+                        danger_WEST = int((self.x - SPEED) - (self.image.get_width()//2) <=0)
+                        danger_NORTH = int((self.y - SPEED) - (self.image.get_height()//2) <= 0)
+                        
+                        cardinal_dangers = [danger_EAST,danger_SOUTH,danger_WEST,danger_NORTH]
+                        _idx = (self.index_cardinal_direction - 1)%4 #relative starting position of agent's left-ahead-right directions, based on its current direction
+                        for i in range(3):
+                        danger_vector[i] = cardinal_dangers[(_idx+i)%4]
+                        return danger_vector
+                    </code></pre>
+                </p>
+                <p>
+                    This is one of those functions that can give you nightmares at night, so let's dissect it bit by
+                    bit. First, remember how we represent the cardinal direction of the agent by using an index:
+                </p>
+                <p>
+                    self.index_cardinal_direction is:
+                </p>
+                <ul>
+                    <li>EAST: 0</li>
+                    <li>SOUTH: 1</li>
+                    <li>WEST: 2</li>
+                    <li>NORTH: 3</li>
+                </ul>
+                Then, we can move our agent a little bit (a value of SPEED, to be precise) in the four cardinal
+                directions, while asking if moving the
+                agent in that cardinal direction will touch a wall. For convenience, we also turn these questions into
+                integers to have 0's if the answer is no (moving the
+                agent in that direction doesn't touch the wall) or 1's (if moving the agent in that direction enters a
+                wall).
+                <ul class="mt-3">
+                    <li>danger_EAST = int((self.x + SPEED) + (self.image.get_width()//2) >= SCREEN[0])</li>
+                    <li>danger_SOUTH = int((self.y + SPEED) + (self.image.get_height()//2) >= SCREEN[1])</li>
+                    <li>danger_WEST = int((self.x - SPEED) - (self.image.get_width()//2) <=0) </li>
+                    <li>danger_NORTH = int((self.y - SPEED) - (self.image.get_height()//2) <= 0)</li>
+                </ul>
+                </p>
+                <p>
+                    We will place our questions into a list, arranged always in a clockwise direction and starting with
+                    EAST.
+                <pre><code>
+                    cardinal_dangers = [danger_EAST,danger_SOUTH,danger_WEST,danger_NORTH]
+                </code></pre>
+                </p>
+                <p>
+                    Now we can ask the agent in which direction it's currently going, to get a sense of which cardinal
+                    dangers to
+                    look at. For example:
+                <ul>
+                    <li>If the agent's cardinal direction index is 0 (EAST), we look NORTH(left), EAST(ahead),
+                        SOUTH(right).</li>
+                </ul>
+                This matches the indexes in the cardinal_dangers list: 3 (danger north), 0 (danger east) and 1 (danger
+                south).
+                The important part is that you look at the items in the cardinal_dangers list starting at the value
+                of your index_cardinal_direction -1, always moving in a clockwise fashion and adding the modulo to keep
+                the process cyclic.
+                Thus, the following formula maps the direction of the agent (index_cardinal_direction) to the direction
+                representing the left of such direction in the cardinal_dangers list:
+                <pre><code>
+                        _idx = (self.index_cardinal_direction - 1)%4
+                    </code></pre>
+                </p>
+                <p>Then, our for loop will visit every entry in the danger_vector (three elements) while placing the
+                    value of its matching danger for the left, ahead, and right positions</p>
+
+                <h2 class="text-center m-5">Evaluating food proximity</h2>
+                <p>
+                    To provide the agent with a sense of where the closes food item is (if any), we can create a new
+                    method get_food() in the Agent class:
+                <pre><code>
+        def get_food(self,foods):
+            # identify which food is closest
+            candidate = None 
+            shortest_distance = None
+            for food in foods:
+                if food is not None:
+                    h = ((self.x + food.x)**2 + (self.y + food.y)**2)**0.5
+                    if shortest_distance is None or shortest_distance>=h:
+                        shortest_distance = h 
+                        candidate = food
+            # identify its position relative to the agent
+            if candidate is not None:
+                food_is_EAST = candidate.x >= self.x 
+                food_is_SOUTH = candidate.y >= self.y
+                food_vector = [int(food_is_EAST),int(food_is_SOUTH),int(not food_is_EAST), int(not food_is_SOUTH)]
+                return food_vector
+            return [0,0,0,0]  
+                    </code></pre>
+                </p>
+                <p>
+                    The algorithm above can be divided in two main tasks. First, gather whichever food item is the
+                    closest to the player, based on the pytagorean distance <b>h</b> between the food and the agent. The
+                    best candidate will have the shortest distance to the agent.
+                </p>
+                <p>
+                    Then, we create the list food_vector by asking if the food is to the east of the agent, and if the
+                    food is south of the agent. Each of these two questions has an inverse (WEST and NORTH), and we can
+                    safely asssume they are mutually exclusive scenarios. When the food is not east, then it has to be
+                    west. We represent this information in the food_vector by using the not operator, then casting the
+                    True/False boolean into a binary value 1/0.
+                </p>
+                <p>
+                    What is left is merging the two vectors dangers_around and food_around into a single array with 7 elements.
+                    <pre><code>
+        def get_state(self, foods):
+            dangers_around = self.get_dangers()
+            food_around = self.get_food(foods)
+            <b style="font-size: 1.2em; color:green;">state = dangers_around+food_around</b>
+            <b style="dont-size: 1.2em; color:green">return np.array(state, dtype=float)</b>
+                    </code></pre>
+                </p>
+                <p>
+                    We also need to remember to pass the foods list when we summon the method get_state from the Game Manager:
+                    <pre><code>
+        def update(self):
+            [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
+            for agent in self.agents:
+                if not agent.isDead:
+                    # get numerical interpretation of environment
+                    <b style="font-size: 1.2em;color: green;">previous_env = agent.get_state(self.foods)</b>
+                    # use model to predict a move
+                    new_move = agent.get_action(previous_env)
+                    # apply the move
+                    reward, done, score = agent.play_step(new_move, self.foods)
+                    # get new state from applied move
+                    <b style="font-size: 1.2em;color: green;">new_env = agent.get_state(self.foods)</b>
+                    # train short memory
+                    agent.train_short_memory(previous_env, new_move, reward, new_env, done)
+                    # add results to memory
+                    agent.remember(previous_env, new_move, reward, new_env, done)
+                    
+            # if the game is out of agents, then game is over. Reset the game and train long memory
+            agents_alive = sum([1 for agent in self.agents if not agent.isDead])
+            if agents_alive == 0:
+                self.reset()
+                for agent in self.agents:
+                    agent.n_games += 1
+                    agent.train_long_memory()
+                
+                    </code></pre>
+                </p>
+                <p>
+                    And, finally, to inform the neural network its new input size is 7 for the state of our world.
+                    <pre><code>
+                                
+            SCREEN = (640,480)
+            MAX_MEMORY = 100_000
+            BATCH_SIZE = 1000
+            LR = 0.001
+            <strike>WORLD_STATES = 4</strike>
+            <b>WORLD_STATES = 7</b>
+            ACTION_STATES = 3
+            SPEED = 5
+                    </code></pre>
+                </p>
+            </div>
+
+
+        </div>
+
+
+        <script>
+            $("#navbarJQ").load("navbar.html");
+        </script>
+</body>
+
+</html>
