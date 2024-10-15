@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+</head>
+
+<body style="background-color: #c5d2d2; color: #032625;">
+    <!-- ############### Insert NAVBAR with jQuery ############## -->
+    <div id="navbarJQ"></div>
+    <!-- ############### Edit text elements in this page ############## -->
+    <div class="container ">
+        <div class="row pt-5">
+            <div class="col-lg-3">
+                <img class="img-fluid" style="width:80%; height: auto;" src="./images/main_logo.png" alt="">
+            </div>
+            <div class="col-lg-9 align-items-center d-flex abc">
+                <span style="font-size: 2em;">Chapter 7</span> - <span style="font-size: 1.2em"> Breakout AI</span>.
+            </div>
+            <!-- <div class="text-center mt-5">
+                <iframe width="70%" height="420" src="https://www.youtube.com/embed/hSqANjfu3bU?si=-n6nyl0pZ-OEsoh5"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div> -->
+
+
+            <div class="row-lg-12 pt-5">
+                <p>
+                    This chapter will focus on the creation of the Breakout layour using the <b>rlpp_designer</b>, the
+                    encoding of the agent's actions, and the encoding of the agent's state.
+                </p>
+                <p>
+                    We begin our project with the creation of a layout for our game of Breakout. The game should have:
+                <ul>
+                    <li>paddle (agent)</li>
+                    <li>ball ("food")</li>
+                    <li>blocks (walls)</li>
+                </ul>
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_7/0.png" style="width: 70%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <p>
+                    Our game will evaluate the following interactions:
+                <ul>
+                    <li>Paddle - Ball (small reward)</li>
+                    <li>Ball - Block (big reward)</li>
+                    <li>Ball - Screen (penalties)</li>
+                </ul>
+                Our agent will perform three possible actions, represented in a vector:
+                <pre><code>
+                    [LEFT, NONE, RIGHT]
+                    </code></pre>
+                Our agent will understand its world by using the following vector:
+                <pre><code>
+                    [
+                    Ball is left,
+                    Ball is right,
+                    Ball is in the top half of the screen,
+                    Ball is in the bottom half of the screen,
+                    paddle is touching left edge,
+                    paddle is touching right edge
+                    ]
+                    </code></pre>
+                </p>
+
+                <p>
+                    Let's begin by exporting our layour using the second option "As AI agents". Then create and run a
+                    script that uses the rlpp.rl_processor to generate the base code for our game, called
+                    <b>rl_output.py</b>. You can change the file name if you wish.
+                </p>
+                <h1 class="text-center m-5">The agent's actions and interactions</h1>
+                <p>
+                    We begin the code by making the agent (paddle) move based on the action received by the
+                    <b>play_step()</b> method, located inside the Agent class:
+                <pre><code>
+        def play_step(self,action):
+            <b style="font-size: 1.2em;color: green;">if action == [1,0,0] and (self.x - self.image.get_width()//2 - SPEED) > 0:</b>
+            <b style="font-size: 1.2em;color: green;">    self.x -= SPEED</b>
+            <b style="font-size: 1.2em;color: green;">elif action == [0,0,1] and (self.x + self.image.get_width()//2 + SPEED) < SCREEN[0]:</b>
+            <b style="font-size: 1.2em;color: green;">    self.x += SPEED</b>
+            
+            reward = 0
+            score = 0
+            return reward, self.isDead, score
+            
+                    </code></pre>
+                </p>
+                <p>
+                    This code snippet receives the direction where the agent wants to move, and if moving there keeps us
+                    within the boundaries of the screen, then it applies the change in x. Notice the vector with value
+                    [0,1,0] is not represented in the code because that action represents no movement. Notice also a new
+                    constant SPEED has been added somewhere else in the document (not shown but added at the top of the
+                    document), and is being used in the code to represent
+                    the changes in the position of x.
+                </p>
+                <p>
+                    Next, we need to calculate whether the game is over and the reward. We need two helper functions:
+                <ul>
+                    <li>collision_paddle_ball() - gives small reward</li>
+                    <li>collision_blocks_ball() - gives big reward</li>
+                    <li>collision_ball_screen() - gives game over</li>
+                </ul>
+                </p>
+
+                <h2 class="text-center m-5">Updating collisions</h2>
+                <p>
+                    Because the collision events involve all elements in the game, some of which do not involve the
+                    agent at all (for example, collision of the ball with the screen or the blocks), we will create
+                    these methods as part of the Game Manager instead of the Agent class. Each of these events will
+                    modify a parameter that will be passed to the agent when we call agent.play_step().
+                </p>
+                <p>
+                <pre><code>
+                        def update(self):
+                        [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
+                        for agent in self.agents:
+                        if not agent.isDead:
+                        <b style="font-size: 1.2em;color: green;">frame_reward = self.collision_paddle_ball(agent)</b>
+                        <b style="font-size: 1.2em;color: green;">frame_reward += self.collision_blocks_ball()</b>
+                        <b style="font-size: 1.2em;color: green;">isGameOver = self.collision_ball_screen()</b>
+                        # get numerical interpretation of environment
+                        previous_env = agent.get_state()
+                        # use model to predict a move
+                        new_move = agent.get_action(previous_env)
+                        # apply the move
+                        <b style="font-size: 1.2em;color: green;">reward, done, score = agent.play_step(new_move, frame_reward, isGameOver)</b>
+                        # get new state from applied move
+                        new_env = agent.get_state()
+                        # train short memory
+                    agent.train_short_memory(previous_env, new_move, reward, new_env, done)
+                    # add results to memory
+                    agent.remember(previous_env, new_move, reward, new_env, done)
+                </code></pre>
+                </p>
+                <p>
+                    Notice we're calling these functions for each of the agents in our game, and passing the agent
+                    itself as an argument to the first method collision_paddle_ball. Even though our code only has one
+                    paddle, it is important that we get familiar to this architecture, as it allows for the integration
+                    of more agents if we want to add them later.
+
+                </p>
+                <h2 class="text-center m-5">paddle - ball collision (Small reward)</h2>
+                <p>
+                    We create a new method inside of GameManager.
+                <pre><code>
+        def collision_paddle_ball(self,agent):
+            total_reward = 0
+            for ball in self.foods:
+                if agent.rect.colliderect(ball):
+                    total_reward += 1
+                    ball.dy = -abs(ball.dy)
+            return total_reward
+                </code></pre>
+                Our method receives an agent and goes over all pieces of "food" (balls) in the list self.foods. Then we
+                use the hitbox to ask if that ball is touching the paddle. For each collision we add a small reward of
+                1, then return the output.
+                </p>
+                <h2 class="text-center m-5">ball - blocks collision (Big reward)</h2>
+                <p>
+                    We create another method inside the GameManager class:
+                <pre><code>
+        def collision_blocks_ball(self):    
+            total_reward = 0
+            for block in self.walls:
+                for ball in self.foods:
+                    if block.rect.colliderect(ball):
+                        self.update_ball_pos(ball,block)
+                        total_reward += 10
+                        self.walls.remove(block)
+                        break
+            return total_reward
+                    </code></pre>
+                Here we need a two-level for loop because we have two arrays: one for the blocks and one for the balls.
+                For each combination of ball/block, we ask if the two are colliding. If they are, we determine which way
+                the ball should bounce by calling another function <b>update_ball_pos()</b>, which receives the ball and
+                block. Afterwards, we destroy the block, add the big reward and break the loop to avoid another ball
+                from trying to collide and erase an block that has already been deleted, therefore avoiding an execution
+                error.
+                </p>
+                <p>
+                    Our update_ball_pos() method looks as follows, and is also created inside of the GameManager class:
+                <pre><code>
+        def update_ball_pos(self,ball,block):
+            overlap_left = ball.rect.center[0] - block.rect.left
+            overlap_right = block.rect.right - ball.rect.center[0]
+            overlap_up = ball.rect.center[1] - block.rect.top
+            overlap_bottom = block.rect.bottom - ball.rect.center[1]
+            edge_distance = min (overlap_right,overlap_bottom,overlap_left,overlap_up)
+            # RIGHT BOUNCE
+            if edge_distance == overlap_right:
+                ball.dx = abs(ball.dx)
+            # BOTTOM BOUNCE
+            if edge_distance == overlap_bottom:
+                ball.dy = abs(ball.dy)
+            # LEFT BOUNCE
+            if edge_distance == overlap_left:
+                ball.dx = -abs(ball.dx)
+            # UP BOUNCE
+            if edge_distance == overlap_up:
+                ball.dx = -abs(ball.dx)
+                    </code></pre>
+                </p>
+
+                <h2 class="text-center m-5">Ball - screen collision (Game Over)</h2>
+
+                <p>
+                    We add a new method collision_ball_screen() to the GameManager class:
+                <pre>
+                        <code>
+        def collision_ball_screen(self):
+            for ball in self.foods:
+                # touching EAST edge
+                if (ball.x + ball.image.get_width()//2) >=SCREEN[0]:
+                    ball.dx = -abs(ball.dx)
+                # touching WEST edge
+                if (ball.x - ball.image.get_width()//2) <=0:
+                    ball.dx = abs(ball.dx)
+                # touching NORTH edge
+                if (ball.y - ball.image.get_height()//2) <=0:
+                    ball.dy = abs(ball.dy)
+                
+                # touching SOUTH edge - Destroy ball
+                if (ball.y + ball.image.get_height()//2) >=SCREEN[1]:
+                    self.foods.remove(ball)
+                
+            if len(self.foods) == 0:
+                return True 
+            return False
+                        </code>
+                    </pre>
+                This method will go through every ball in the game, updating the speed of the ball in the x (dx) or y
+                (dy) axis first, then making one last evaluation against the bottom (SOUTH) wall. If the ball touches
+                that wall, it gets removed from the game. If at the end of the game there are no balls left, then the
+                state of the game is game over.
+                </p>
+                <p>
+                    Notice that at this point the ball doesn't have a velocity in x nor y, or a function that updates
+                    the velocity of the ball every frame. We create these elements in the Food class. First,we add the
+                    velocities dx and dy to the __init__() method in the Food class:
+                <pre><code>
+        class Food(GameObject):
+            def __init__(self, position, angle, object_type, img_path, scale_factor):
+                super().__init__(position, angle, "food", img_path, scale_factor)
+                self.dx = 1
+                self.dy = -1
+                    </code></pre>
+                An important consideration is the value given to dy, which is positive if we want the ball to go DOWN,
+                and negative for the ball to go UP. Let's add the method update_position(), also within the class Food.
+                <pre>
+                    <code>
+        def update_position(self):
+            self.x += self.dx 
+            self.y += self.dy
+                    </code>
+                </pre>
+                </p>
+                <p>
+                    Finally, we need to make sure to call this function within the GameManager's update() method so it
+                    updates every ball in the game.
+                <pre>
+                        <code>
+        def update(self):
+            [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
+            <b style="font-size: 1.2em;color: green;">for ball in self.foods:</b>
+            <b style="font-size: 1.2em;color: green;">    ball.update_position()</b>
+                
+            for agent in self.agents:
+                if not agent.isDead:
+                    frame_reward = self.collision_paddle_ball(agent)
+                    frame_reward += self.collision_blocks_ball()
+                    isGameOver = self.collision_ball_screen()
+                    # get numerical interpretation of environment
+                    previous_env = agent.get_state()
+                    # use model to predict a move
+                    new_move = agent.get_action(previous_env)
+                    # apply the move
+                    reward, done, score = agent.play_step(new_move, frame_reward, isGameOver)
+                    # get new state from applied move
+                    new_env = agent.get_state()
+                    # train short memory
+                    agent.train_short_memory(previous_env, new_move, reward, new_env, done)
+                    # add results to memory
+                    agent.remember(previous_env, new_move, reward, new_env, done)
+                
+            # if the game is out of agents, then game is over. Reset the game and train long memory
+            agents_alive = sum([1 for agent in self.agents if not agent.isDead])
+            if agents_alive == 0:
+                self.reset()
+                for agent in self.agents:
+                    agent.n_games += 1
+                    agent.train_long_memory()
+                        </code>
+                    </pre>
+                </p>
+                <h2 class="text-center m-5">Completing the agent's play_step() method</h2>
+                <p>
+                    To complete the play_step() method of the Agent class, we add:
+                <pre><code>
+        def play_step(self,action,<b>reward</b>,<b>isGameOver</b>):
+            if action == [1,0,0] and (self.x - self.image.get_width()//2 - SPEED) > 0:
+                self.x -= SPEED
+            elif action == [0,0,1] and (self.x + self.image.get_width()//2 + SPEED) < SCREEN[0]:
+                self.x += SPEED
+            <b>if isGameOver:</b>
+                <b>self.isDead = True</b>
+            score = 0
+            return reward, self.isDead, score
+                    </code></pre>
+                While the reward is returned "as is", we need to make sure the agent's internal state isDead reflects
+                the value of the parameter isGameOver. Now that we have the actions of our agent represented in our
+                game, it's time to work on how the agents sees the world.
+                </p>
+
+                <h1 class="text-center m-5">The agent's state</h1>
+                <p>
+                    Our agent will be able to "observe" Four types of conditions that add to a vector with 6 elements:
+                <ul>
+                    <li>Is the ball at the left or not left of the <b>paddle</b></li>
+                    <li>Is the ball in the top or not top of the <b>screen</b></li>
+                    <li>Is the paddle touching the left edge?</li>
+                    <li>Is the paddle touching the right edge?</li>
+                </ul>
+                We add the following code to our get_state() method, inside of our Agent class.
+                <pre><code>
+        def get_state(self,balls):
+            state = [0,0,0,0,0,0]
+            # find the nearest ball
+            candidate = None 
+            closest_distance = None
+            for ball in balls:
+                h = ((self.x + ball.x)**2 + (self.y + ball.y)**2)**0.5
+                if closest_distance is None or closest_distance >=h:
+                    candidate = ball
+                    closest_distance = h
+                    
+            if candidate is not None:            
+                ball_is_left = int(self.x - candidate.x > 0)
+                ball_is_top = int(candidate.y <= SCREEN[1]//2)
+                paddle_is_left= int((self.x - self.image.get_width()//2) <= (0 + SPEED))
+                paddle_is_right = int((self.x - self.image.get_width()//2) >= (SCREEN[0] - SPEED))
+                state = [int(ball_is_left),int(not ball_is_left),int(ball_is_top),int(not ball_is_top),paddle_is_left,paddle_is_right]
+            
+            return np.array(state, dtype=float)
+                    </code></pre>
+                </p>
+                <p>
+                    We begin by specifying the final dimensions of our state vector with an "empty" list with 6 zeroes.
+                    We then identify the closest ball to the paddle (for simplicity) and then evaluate 4 out of the 6
+                    potential cases that make our state. Because the ball being to the left is the opposite to being
+                    right, and being in the top half is always opposite of being at the bottom, we only calculate one of
+                    each case, using the position of the candidate ball in x and y. In the case of the paddle touching
+                    the edge, we use the position in x of the paddle while considering half of the paddle's width to the
+                    left and right, and comparing those values against the edges left (with value <= 0) and right (with
+                        value>= SCREEN[0]).
+                </p>
+                <p>
+                    Before concluding our program, we ensure the parameter WORLD_STATES, located at the top of the
+                    document, has a value of 6 (matching the length of our state vector). Likewise, we make sure to pass
+                    the list of balls, called self.foods, to the method get_state in the GameManager.
+                <pre><code>
+    def update(self):
+        [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
+        for ball in self.foods:
+            ball.update_position()
+            
+        for agent in self.agents:
+            if not agent.isDead:
+                frame_reward = self.collision_paddle_ball(agent)
+                frame_reward += self.collision_blocks_ball()
+                isGameOver = self.collision_ball_screen()
+                # get numerical interpretation of environment
+                <b style="font-size: 1.2em;color: green;">previous_env = agent.get_state(self.foods)</b>
+                # use model to predict a move
+                new_move = agent.get_action(previous_env)
+                # apply the move
+                reward, done, score = agent.play_step(new_move, frame_reward, isGameOver)
+                # get new state from applied move
+                <b style="font-size: 1.2em;color: green;">new_env = agent.get_state(self.foods)</b>
+                # train short memory
+                agent.train_short_memory(previous_env, new_move, reward, new_env, done)
+                # add results to memory
+                agent.remember(previous_env, new_move, reward, new_env, done)
+                    </code></pre>
+                </p>
+                <h2 class="text-center m-5">Imrproving the state representation</h2>
+                <p>
+                    If your network is anything like mine at this stage, the agent moves, the ball bounces and the
+                    blocks are destroyed... but the agent doesn't seem to be doing any better after half an hour of
+                    training the game. This
+                    is the part where your own expertise in game design comes into play. We need to carefully design the
+                    characteristics of the environment to make sure the agent performs as we want it to.
+                </p>
+                <p>
+                    Right now, the agent knows when it touches a wall (left or right), but has no idea on where it is
+                    relative to the screen. Our agent also knows when the ball is left or right, but not if it's going
+                    up or coming back down. Let's add these two elements to our state.
+                </p>
+                <p>
+                    First, the <b>relative</b> position of the agent in the world. We could pass the raw values in x to
+                    the network, but it could cause some harm to the training because these values are
+                    disproportionately bigger than the rest of the information we're feeding the network. We need to
+                    <b>normalize</b> the values. We will use the formula:
+                <pre><code>
+                        relative_position = tanh(paddle.x/SCREEN[0])
+                    </code></pre>
+                </p>
+            </div>
+
+
+        </div>
+
+
+        <script>
+            $("#navbarJQ").load("navbar.html");
+        </script>
+</body>
+
+</html>
