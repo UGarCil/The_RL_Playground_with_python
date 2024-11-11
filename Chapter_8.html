@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+</head>
+
+<body style="background-color: #c5d2d2; color: #032625;">
+    <!-- ############### Insert NAVBAR with jQuery ############## -->
+    <div id="navbarJQ"></div>
+    <!-- ############### Edit text elements in this page ############## -->
+    <div class="container ">
+        <div class="row pt-5">
+            <div class="col-lg-3">
+                <img class="img-fluid" style="width:80%; height: auto;" src="./images/main_logo.png" alt="">
+            </div>
+            <div class="col-lg-9 align-items-center d-flex abc">
+                <span style="font-size: 2em;">Chapter 8</span> - <span style="font-size: 1.2em"> Flappy Bird AI</span>.
+            </div>
+            <div class="text-center mt-5">
+                <iframe width="70%" height="420" src="https://www.youtube.com/embed/4ELmN3T7mKU?si=wslTQnK39zOzaMkc"
+                    title="YouTube video player" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+
+
+            <div class="row-lg-12 pt-5">
+                <p>
+                    In this Chapter we recreate the game of Flappy Bird. This game gained great popularity around the
+                    year 2014. The game became viral, quickly becoming the most downloaded app in the App Store, but
+                    despite its success, its creator Dong Nguyen took it out of the market due to polemic in its
+                    graphics and the constant complain from frustated users. When the app was taken from the market,
+                    some people began selling phones on eBay with the game installed.
+                </p>
+                <p>
+                    So what makes this game so challenging? In this environment we force an agent/user to maintain a
+                    character in the "air". We modify the vertical position by pressing a button, which adds vertical
+                    velocity while working against gravity.
+                </p>
+                <h2 class="text-start m-5">Setting up the game components</h2>
+                <p>
+                    We begin by opening the rlpp_designer and creating our layout. Our layout should contain:
+                <ul>
+                    <li>a bird</li>
+                    <li>top pipe</li>
+                    <li>bottom pipe</li>
+                </ul>
+
+                Don't worry about the horizontal position of the pipes at this stage, but be careful on getting the
+                distance between the pipes (gap), as the agent will have to go through it. If the gap is too small, the
+                task will be impossible, and if it's too wide, it will be too easy.
+                </p>
+                <p>
+                    Export your work and create the rl_output.pt and Model.py files using the rlpp.processor method
+                    map_json().
+                </p>
+                <div class="text-center m-3">
+                    <img src="./images/Chapter_8/0.png" style="width: 70%; height: auto;" class="img-fluid text-center"
+                        alt="">
+                </div>
+                <h2 class="text-start m-5">Pipes</h2>
+                <p>
+                    Our pipes are currently not connected, and they are not moving either. Let's modify the method reset
+                    found inside the GameManager:
+                <pre>
+                        <code>
+        class GameManager():
+            ... 
+
+            def reset(self):
+                self.score = 0
+                self.timer = 0
+                self.resetTimer = 1_000
+                self.walls=[]
+                <b style="color: green;">self.go_wall_1 = Wall([SCREEN[0] + 50, 47],0,"wall",r".\images\pipe_2_32.png",abs(1));self.walls.append(self.go_wall_1)</b>
+                <b style="color: green;">self.go_wall_0 = Wall([SCREEN[0] + 50, 47 + HEIGHT_GAP],0,"wall",r".\images\pipe_1_32.png",abs(1));self.walls.append(self.go_wall_0)</b>
+                <b style="color: green;">self.go_wall_1.comp = self.go_wall_0</b>
+                <b style="color: green;">self.go_wall_0.comp = self.go_wall_1</b>
+                <b style="color: green;">self.go_wall_1.relPos = "top"</b>
+                <b style="color: green;">self.go_wall_0.relPos = "bottom"</b>
+                self.foods=[]
+                self.all_game_objects = self.static_game_objects + [self.walls,self.foods]
+        
+                for logo in self.all_game_objects:
+                    for go in logo:
+                        go.reset()
+                        </code>
+                    </pre>
+
+                This code takes the two pipes and places them into the same position in the x axis:
+                <pre><code>
+                    [SCREEN[0] + 50, 47]
+                    [SCREEN[0] + 50, 47 + HEIGHT_GAP]
+                </code></pre>
+                We can set the position of the second pipe (bottom) relative to the location of the first one + a height
+                gap. We can set a new constant variable (with capital cases to let other programers know) at the top of
+                the document:
+                <pre><code>
+                    HEIGHT_GAP = 350
+                </code></pre>
+                The value of HEIGHT_GAP greatly depends on your preference. You can calculate it by taking the original
+                position in y of self.go_wall_1 - self.go_wall_0. You can also set it to be the same as the example
+                above.
+                </p>
+                <p>
+                    The walls (pipes) also contain two new variables:
+                <ul>
+                    <li>comp: is an object of type Wall that makes a reference to the other pipe. For example, the comp
+                        variable of the top pipe will
+                        store the bottom pipe. This will enable quick access to the complementary pipe in the game</li>
+                    <li>relPos: is a string that takes note on the relative position of the pipe in the map. It can be
+                        "top" or "bottom"</li>
+                </ul>
+                </p>
+                <p>
+                    We are almost done setting up our pipes! However, the pipes are still not moving, they are supposed
+                    to help us create new pipes (procedural generation), and they are also supposed to help us reward
+                    the user. We need to make changes to the internal structure of the class Wall to achieve this:
+                <pre><code>
+        class Wall(GameObject):
+            def __init__(self, position, angle, object_type, img_path, scale_factor):
+                super().__init__(position, angle, "wall", img_path, scale_factor)
+                <b style="color: rgb(0, 128, 100);">self.has_instantiated = False </b>
+                <b style="color: rgb(0, 128, 100);">self.has_rewarded = False </b>
+            
+            <b style="color: green;">def update_position(self):</b>
+            <b style="color: green;">    self.x -= PIPE_VEL</b>
+                    </code></pre>
+                </p>
+
+
+                <p>
+                    We created two new boolean attributes inside the Wall, named <b>has_instantiated</b> and
+                    <b>has_rewarded</b>, in charge of telling if a pipe has helped created a new set of pipes and if the
+                    pipe has rewarded the agent upon meeting certain conditions.
+                </p>
+
+
+                <p>
+                    Now, let's make sure to call the new method <b>update_position()</b> inside the <b>update()</b>
+                    method of the GameManager.
+
+                <pre><code>
+        class GameManager():
+            ...
+
+            def update(self):
+                [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
+                <b style="color: green;">for wall in self.walls:</b>
+                <b style="color: green;">    wall.update_position()</b>
+                <b style="color: green;">    if wall.x <= -100:</b>
+                <b style="color: green;">        self.walls.remove(wall)</b>
+                ...
+                    </code></pre>
+                </p>
+                <h1 class="text-center m-5">Rewards and Game Over</h1>
+                <p>
+                    It's time to extract information on the envrionment in the form of penalties and rewards. The game
+                    will be considered to be over when the bird touches the ceiling/floor or any of the pipes. If the
+                    bird successfully navigates through the gap in between two pipes, we give a high reward. The issue
+                    is that,
+                    compared to most frames, those representing the bird passing between pipes are rare, affecting
+                    training. We fix this issue by giving our agent an additional reward for staying in the air. We will
+                    need three helper functions:
+                <ul>
+                    <li><b>touching_walls()</b>: Returns a game over state of True when the bird has touched either of
+                        the
+                        walls top or bottom, or any pipe in the game.</li>
+                    <li><b>passing_walls()</b>: Returns a reward of 10 (5 for each pipe pair) whenever the two closest
+                        pipes
+                        pass the bird. The method also creates a new set of pipes when the conditions are right</li>
+                    <li><b>in_middle_walls()</b>: Returns a reward if the bird manages to stay close to the center of a
+                        gap
+                        between the two nearest pipes. If the agent goes to far in either direction up or down, the
+                        reward turns into a penalty.</li>
+                </ul>
+                </p>
+                <h2 class="text-start m-5">touching_walls()</h2>
+                <p>
+                    We place this method in the GameManager class because this object has access to all the walls
+                    (pipes).
+                <pre><code>
+        class GameManager():
+            ... 
+            def touching_walls(self,agent):
+                for wall in self.walls:
+                    if wall.rect.colliderect(agent):
+                        return True 
+                if agent.rect.top <= 0 or agent.rect.bottom >= SCREEN[1]:
+                    return True 
+                return False 
+                    </code></pre>
+                In this method, we go through all walls asking if the pipe is touching the agent, returning True and
+                ending the loop when finding the first instance when this happens. If the bird is not touching any pipe,
+                we evaluate if the edges are being touched by the respective boundaries of our agent's hitbox (top for
+                the top of the screen with value 0 in y and bottom for the bottom of the screen with value SCREEN[0] in
+                y). The parameter SCREEN is a tuple, containing two integers that represent the width and height of our
+                screen.
+                </p>
+                <h2 class="text-start m-5">passing_walls()</h2>
+                <p>
+                    We add a new method to our GameManager class:
+                <pre><code>
+        def passing_walls(self,agent):
+            reward = 0
+            create_new = False 
+            for wall in self.walls:
+                if wall.x <= agent.x and not wall.has_rewarded:
+                    reward += 5
+                    wall.has_rewarded = True 
+                if wall.x <= agent.x + 400 and not wall.has_instantiated and wall.relPos == "top":
+                    wall.has_instantiated = True 
+                    random_placing = random.randint(-60,60)
+                    self.go_wall_1 = Wall([SCREEN[0] + 50, random_placing],0,"wall",r".\images\pipe_2_32.png",abs(1));self.walls.append(self.go_wall_1)
+                    self.go_wall_0 = Wall([SCREEN[0] + 50, random_placing + HEIGHT_GAP],0,"wall",r".\images\pipe_1_32.png",abs(1));self.walls.append(self.go_wall_0)
+                    self.go_wall_1.comp = self.go_wall_0
+                    self.go_wall_1.relPos = "top"
+                    self.go_wall_0.comp = self.go_wall_1
+                    self.go_wall_0.relPos = "bottom"
+            return reward
+                    </code></pre>
+                </p>
+                <p>
+                    In this method, we go through all pipes again, asking two questions per pipe. First we ask if the
+                    agent has passed the wall by comparing their position in the x axis, and give a reward while also
+                    deactivating the pipe to prevent this pipe from rewarding the agent again afterwards.
+                </p>
+                <p>
+                    The second question is connected to instantiation. In this game, the total number of pipes created
+                    depend on the amount of time the agent has survived the game. This means we have to come up with a
+                    set of rules to determine when and how to generate new pipes. We will create a new set of pipes if
+                    the <b>top</b> (and only the top) pipe is currently 400 pixels to the right of the agent. We then
+                    deactivate the pipe so it doesn't instantiate new ones afterwards, and finally we create a new pair
+                    of pipes the same way we did in the reset method of the GameManager.
+                </p>
+
+                <h2 class="text-start m-5">in_middle_walls()</h2>
+                <p>This method has the purpose of rewarding or penalizing our agent based on its distance to the gap
+                    between two pipes, in the y axis. It works as follows:
+                <pre><code>
+        def in_middle_walls(self,agent):
+            reward = 0
+            candidate = None 
+            shortest_distance = None 
+            for wall in self.walls:
+                if wall.relPos == "top":
+                    d = wall.x - agent.x 
+                    if shortest_distance is None or (d > 0 and shortest_distance > d):
+                        shortest_distance = d 
+                        candidate = wall 
+            
+            if candidate is not None:
+                # reward if within gap of next two pipes
+                if agent.y < candidate.comp.rect.top and agent.y > candidate.rect.bottom:
+                    scaled_distance_agent_center = 1 - abs((candidate.rect.bottom + HEIGHT_GAP//2) - agent.y)/(HEIGHT_GAP//2)
+                    reward = scaled_distance_agent_center * 3
+                # penalty if outside the gap in between the next two pipes
+                else:
+                    scaled_distance_agent_center = abs((candidate.rect.bottom + HEIGHT_GAP//2) - agent.y)/(SCREEN[1]//2)
+                    reward = -scaled_distance_agent_center * 5
+                    
+            return reward
+                    </code></pre>
+                </p>
+                <p>
+                    This method works by first finding the pipe that is closest to the agent. By using two variables
+                    candidate and shortest_distance, we can look at every pipe in the game, focusing only on top pipes
+                    because we can access the bottom pipe with the variable <b>comp</b> inside the pipe. We calculate
+                    the distance between the pipe and the agent, and if the pipe is to the right of the agent, and the
+                    distance is shorter than the last best pipe, we update our candidate to be this new top pipe.
+
+                </p>
+                <p>
+                    Afterwards we determine if the agent's position in y is overlapping the range of pixels covered by
+                    the gap, and if so, we calculate the distance from the middle of the gap to the agent to know how
+                    much reward we should give. The closer the agent to the middle of the gap, the higher the reward
+                    with a maximum of 5 per frame.
+                </p>
+                <p>
+                    However, if the agent's position in y is not overlapping the gap between two pipes, the reward turns
+                    into a penalty. The farter the agent is to the gap, the higher the penalty.
+                </p>
+
+                <h2 class="text-start m-5">Putting the pieces together</h2>
+
+                <p>
+                    We finalize by calling these three methods for every agent in the update method of our GameManager
+                    class:
+                <pre><code>
+        class GameManager():
+            ... 
+            def update(self):
+                [pygame.quit() for event in pygame.event.get() if event.type == pygame.QUIT]
+                for wall in self.walls:
+                    wall.update_position()
+                    if wall.x <= -100:
+                        self.walls.remove(wall)
+                
+                for agent in self.agents:
+                    if not agent.isDead:
+                        <b style="font-size: 1.2em;color: green;">isGameOver = self.touching_walls(agent)</b>
+                        <b style="font-size: 1.2em;color: green;">reward = self.passing_walls(agent)</b>
+                        <b style="font-size: 1.2em;color: green;">reward += self.in_middle_walls(agent)</b>
+                        # get numerical interpretation of environment
+                        previous_env = agent.get_state(self.walls)
+                        # use model to predict a move
+                        new_move = agent.get_action(previous_env)
+                        # apply the move
+                        reward, done, score = agent.play_step(new_move, <b style="font-size: 1.3em;">isGameOver, reward</b>)
+                        # get new state from applied move
+                        new_env = agent.get_state(self.walls)
+                        # train short memory
+                        agent.train_short_memory(previous_env, new_move, reward, new_env, done)
+                        # add results to memory
+                        agent.remember(previous_env, new_move, reward, new_env, done)
+                    
+                # if the game is out of agents, then game is over. Reset the game and train long memory
+                agents_alive = sum([1 for agent in self.agents if not agent.isDead])
+                if agents_alive == 0:
+                    self.reset()
+                    for agent in self.agents:
+                        agent.n_games += 1
+                        print(agent.n_games)
+                        print(agent.epsilon)
+                        agent.train_long_memory()
+                    </code></pre>
+                </p>
+                <p>
+                    Notice that we are passing our agent to each of these functions, and the fact that each function
+                    returns something. In the last function <b>self.in_middle_walls()</b>, we use <b
+                        style="font-size: 1.5em;">+=</b> instead of <b style="font-size: 1.5em;">=</b> so we can add to
+                    the current reward rather than setting the reward to a new value. Let's dive into how the play_step
+                    method enables us to control the agent's actions!
+                </p>
+                <p>
+                    In addition, please take note on the fact we give these returns to our agent's play_step()
+                    method with the names isGameOver and reward.
+                </p>
+                <h2 class="text-start m-5">play_step() is used to control our agent's actions</h2>
+                <p>
+                    Each agent in our game has its own method play_step (among many other things). Let's add the
+                    following behavior to our agent's play_step method:
+                <pre><code>
+        class Agent(GameObject):
+            ... 
+            def play_step(self,action, isDead, reward):
+                self.update_velocity(action)
+                self.update_position()
+                self.isDead = isDead
+                
+                if self.isDead:
+                    reward = -15
+                else:
+                    reward = reward
+                score = 0
+                return reward, self.isDead, score
+                    </code></pre>
+                </p>
+                <p>
+                    The agent uses the actions, represented as a one-hot-vector with shape [int,int], to control when to
+                    flap its wings, therefore making it go up while fighting the forces of gravity. We also provide a
+                    penalty is the agent's state is now "dead". To encode the
+                    physics of our game, we call upon two helper methods <b>update_velocity(action)</b> and
+                    <b>update_position()</b>.
+                    We can place these methods inside of our Agent class as well.
+
+                <pre><code>
+        class Agent(GameObject):
+            ...
+            def update_velocity(self,action):
+                if action == [1,0]:
+                    self.dy -= self.jumpForce
+                    self.last_flap = 0
+                else:
+                    self.last_flap += 1
+                    if self.last_flap >= self.max_flap:
+                        self.last_flap = self.max_flap
+                
+                self.dy += self.ddy
+                if self.dy >= self.maxVel:
+                    self.dy = self.maxVel
+                if self.dy <= -self.maxVel:
+                    self.dy = -self.maxVel
+
+            def update_position(self):
+                self.y += self.dy
+                    </code></pre>
+                </p>
+                <p>
+                    The method update_velocity(action) takes the action received by the agent and evaluates if the array
+                    of integers that represents the action has a digit 1 in the first position (index 0). When it does,
+                    the agent's velocity is updated by substraction, eventually leading the agent to move upwards
+                    (because the y axis is flipped relative to how we normally think about math graphs, making going
+                    down positive and up negative). We also set a new attribute of the agent <b>self.last_flap</b> to 0.
+                    This
+                    parameter will help us create a representation of the environment where the agent knows when was the
+                    last time it made a flap.
+                </p>
+                <p>
+                    However, if the agent's action is not [1,0], and instead [0,1], we update the <b>self.last_flap</b>
+                    counter, making sure it doesn't go over a maximum value <b>self.max_flap</b>.
+                </p>
+                <p>
+                    Finally, the vertical velocity of the agent is updated by the force of gravity self.ddy, making sure
+                    the value of agent's velocity doesn't go over <b>self.maxVel</b>, either positive or negative.
+                </p>
+                <p>
+                    The second method update_position() is rather simple. We use the velocity of the agent to modify and
+                    update its position in the vertical axis.
+                    <!-- We will come back to this method at the end of the section
+                    to add an animation of the bird. -->
+                </p>
+                <p>
+                    Before we continue, let's create the attributes we just used in the Agent's constructor (__init__)
+                    and reset
+                    methods.
+                <pre><code>
+        class Agent(GameObject):
+            def __init__(self, position, angle, object_type, img_path, scale_factor):
+                super().__init__(position, angle, "agent", img_path, scale_factor)
+                self.n_games = 0
+                self.epsilon = 0 # randomness
+                self.gamma = 0.96 # discount rate
+                self.memory = deque(maxlen=MAX_MEMORY) # popleft()
+                self.model = Linear_QNet(WORLD_STATES, 256, ACTION_STATES)
+                self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
+                <b style="color: green;font-size: 1.2em;">self.ddy = 0.20</b>
+                <b style="color: green;font-size: 1.2em;">self.maxVel = 3</b>
+                <b style="color: green;font-size: 1.2em;">self.jumpForce = 0.6</b>
+                <b style="color: green;font-size: 1.2em;">self.scaled_max_distance_to_pipe = SCREEN[0] + 50 - self.x</b>
+                <b style="color: green;font-size: 1.2em;">self.max_flap = 50</b>
+            
+            def reset(self):
+                super().reset()
+                self.isDead = False
+                <b style="color: green;font-size: 1.2em;">self.last_flap = self.max_flap</b>
+                    </code>
+                    </pre>
+                </p>
+                <h1 class="text-center m-5">The state representation</h1>
+                <p>
+                    At this point, our agent is equipped with consequences to its actions, in the form of rewards,
+                    penalties and an internal state that declares whether the agent is still in the game. It's time to
+                    give "eyes" to our bird by providing a mathematical representation of it surrounding. This is known
+                    as the state representation of the agent's environment.
+                </p>
+                <p>
+                    We add the following changes to the get_state() method of the Agent class:
+                <pre><code>
+
+
+
+
+        class Agent(GameObject):
+            ... 
+            def get_state(self, pipes):
+                state = [0 for _ in range(WORLD_STATES)]
+                vertical_position = self.y / SCREEN[1]
+                relative_vel = self.dy/self.maxVel
+                
+                candidate = None 
+                shortest_distance = None 
+                for pipe in pipes:
+                    d = pipe.x - self.x
+                    if shortest_distance is None or (shortest_distance > d and pipe.relPos=="top"):
+                        shortest_distance = d 
+                        candidate = pipe 
+                if candidate is not None:
+                    distance_next_pipe = (candidate.rect.left - self.x)/self.scaled_max_distance_to_pipe
+                    distance_agent_top_pipe = (self.rect.top - candidate.rect.bottom)/SCREEN[1]
+                    distance_agent_bottom_pipe = (self.rect.bottom - candidate.comp.rect.top)/SCREEN[1]
+                    time_since_last_flap = self.last_flap / self.max_flap
+                    
+                    state = [
+                        <b style="color: green;font-size: 1.2em;">vertical_position</b>,
+                        <b style="color: green;font-size: 1.2em;">relative_vel</b>,
+                        <b style="color: green;font-size: 1.2em;">distance_next_pipe</b>,
+                        <b style="color: green;font-size: 1.2em;">distance_agent_top_pipe</b>,
+                        <b style="color: green;font-size: 1.2em;">distance_agent_bottom_pipe</b>,
+                        <b style="color: green;font-size: 1.2em;">time_since_last_flap</b>,
+                        ]
+                return np.array(state, dtype=float)
+                    </code></pre>
+                </p>
+                <p>
+                    The components making our state are calculated as follows:
+                <ul>
+                    <li><b style="font-size: 1.2em;">vertical_position</b>: The position of the agent in the y axis
+                        divided by the height of the screen.
+                    </li>
+                    <li><b style="font-size: 1.2em;">relative_vel</b>: The value of dy divided by the maximum velocity
+                    </li>
+                    <li><b style="font-size: 1.2em;">distance_next_pipe</b>: Difference in x axis between left edge of a
+                        top pipe (bottom is at the same
+                        position in x) divided by the maximum possible distance between the agent and a pipe</li>
+                    <li><b style="font-size: 1.2em;">distance_agent_top_pipe</b>: Difference in y axis between the
+                        agent's top edge and top pipe's bottom
+                        edge, divided by screen's height</li>
+                    <li><b style="font-size: 1.2em;">distance_agent_bottom_pipe</b>: Difference in y axis between the
+                        agent's bottom edge and the bottom
+                        pipe's top edge, divided by screen's height</li>
+                    <li><b style="font-size: 1.2em;">time_since_last_flap</b>: the current value of the counter
+                        <b>last_flap</b> divided by the maximum
+                        value of that counter <b>max_flap</b>
+                    </li>
+                </ul>
+                </p>
+                <p>
+                    To extract the information relative to the closest pipe, we need to iterate with a for loop across
+                    all pipes, focusing only on the top pipes, and asking if it is closer to the agent. We do this with
+                    two variables candidate and shortest_distance. Our candidate will store the actual top pipe, and the
+                    shortest_distance is used to compare across pipes and help us keep the pipe with the smallest value.
+                </p>
+                <h2 class="text-start m-5">Animating the bird (Optional)</h2>
+                <p>
+                    Our agent is really to begin training! If you want, you can also animate the bird by adding the
+                    method remap, that takes the current velocity of the bird and uses it to rotate the sprite:
+                <pre><code>
+        class Agent(GameObject):
+            ... 
+            def remap(self,value, from1, to1, from2, to2):
+                return (value - from1) / (to1 - from1) * (to2 - from2) + from2
+
+            ...
+            def update_position(self):
+                self.y += self.dy
+                orig_image = pygame.image.load(self.image_path)
+                self.image = pygame.transform.rotate(orig_image,self.remap(self.dy,-self.maxVel,self.maxVel,90,-90))
+                    </code></pre>
+                </p>
+
+            </div>
+
+
+        </div>
+
+
+        <script>
+            $("#navbarJQ").load("navbar.html");
+        </script>
+</body>
+
+</html>
